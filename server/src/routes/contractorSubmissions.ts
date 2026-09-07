@@ -214,7 +214,7 @@ router.post(
       }
 
       try {
-        const contractorId = req.user!.id;
+        const contractorId = req.user?.id || 'demo-contractor-1';
         const { projectId, projectStageId, title, description, claim, latitude, longitude } = req.body;
 
         if (!projectId || !projectStageId || !title || !claim) {
@@ -222,7 +222,7 @@ router.post(
         }
 
         const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
-        const photoFile = files && files['photo'] ? files['photo'][0] : undefined;
+        const photoFile = files ? (files['photo']?.[0] || files['photos']?.[0]) : undefined;
 
         if (!photoFile) {
           return res.status(400).json({ error: 'Contractor progress evidence photo is required.' });

@@ -67,7 +67,7 @@ function getExtensionFromMime(mime: string): string {
 
 // Multer filter callback
 const fileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  const isPhoto = file.fieldname === 'photo' && ALLOWED_PHOTO_TYPES.includes(file.mimetype);
+  const isPhoto = (file.fieldname === 'photo' || file.fieldname === 'photos') && ALLOWED_PHOTO_TYPES.includes(file.mimetype);
   const isAudio = file.fieldname === 'voice' && ALLOWED_AUDIO_TYPES.includes(file.mimetype);
 
   if (isPhoto || isAudio) {
@@ -89,5 +89,6 @@ export const uploadMiddleware = multer({
   },
 }).fields([
   { name: 'photo', maxCount: 1 },
+  { name: 'photos', maxCount: 5 },
   { name: 'voice', maxCount: 1 },
 ]);

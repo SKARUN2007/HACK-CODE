@@ -119,7 +119,7 @@ export const ContractorProgressUploadPage: React.FC = () => {
       formData.append('claim', claim);
       if (latitude !== null) formData.append('latitude', latitude.toString());
       if (longitude !== null) formData.append('longitude', longitude.toString());
-      formData.append('photos', photoFile);
+      formData.append('photo', photoFile);
 
       const headers: Record<string, string> = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;

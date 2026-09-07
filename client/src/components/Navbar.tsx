@@ -100,6 +100,9 @@ export const Navbar: React.FC<NavbarProps> = ({ userRole, onLogout }) => {
             <Link to="/citizen" className={`nav-item ${location.pathname === '/citizen' ? 'active' : ''}`}>
               {language === 'TA' ? 'பொதுமக்கள் தளம்' : 'Citizen Workspace'}
             </Link>
+            <Link to="/contractor" className={`nav-item ${location.pathname.startsWith('/contractor') ? 'active' : ''}`} style={{ color: '#f97316', fontWeight: 800 }}>
+              {language === 'TA' ? 'ஒப்பந்ததாரர் தளம்' : 'Contractor'}
+            </Link>
             <Link to="/citizen/report" className={`nav-item ${location.pathname === '/citizen/report' ? 'active' : ''}`} style={{ color: '#fbbf24', fontWeight: 800 }}>
               {language === 'TA' ? 'புகாரளிக்கவும்' : 'Report Civic Issue'}
             </Link>

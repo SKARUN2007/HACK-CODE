@@ -48,6 +48,7 @@ import authorityDirectoryRouter from './routes/authorityDirectory';
 import civicMapRouter from './routes/civicMap';
 import inspectionRoutesRouter from './routes/inspectionRoutes';
 import crossDomainRouter from './routes/crossDomainRoutes';
+import contractorSubmissionsRouter from './routes/contractorSubmissions';
 
 // Global Rate Limiting
 app.use(globalRateLimiter);
@@ -56,6 +57,7 @@ app.use(globalRateLimiter);
 app.use('/api/health', healthRouter);
 app.use('/api/auth', authRateLimiter, authRouter);
 app.use('/api/projects', projectsRouter);
+app.use('/api/contractor', contractorSubmissionsRouter);
 app.use('/api/evidence', evidenceRouter);
 app.use('/api/verifications', verificationsRouter);
 app.use('/api/authority/civic-map', civicMapRouter);

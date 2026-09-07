@@ -202,7 +202,14 @@ router.get('/:id', async (req, res) => {
     try {
       project = await prisma.project.findUnique({
         where: { id },
-        include: { milestones: { orderBy: { percentage: 'asc' } } },
+        include: {
+          milestones: { orderBy: { percentage: 'asc' } },
+          stages: { orderBy: { sequence: 'asc' } },
+          contractorSubmissions: {
+            include: { evidences: true, verifications: true, analyses: true, decisions: true },
+            orderBy: { submittedAt: 'desc' },
+          },
+        },
       });
     } catch {
       project = null;

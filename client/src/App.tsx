@@ -27,6 +27,8 @@ import { CivicIntelligenceMapPage } from './pages/CivicIntelligenceMapPage';
 import { InspectorRoutePlannerPage } from './pages/InspectorRoutePlannerPage';
 import { MyInspectionRoutesPage } from './pages/MyInspectionRoutesPage';
 import { InspectionRouteHistoryPage } from './pages/InspectionRouteHistoryPage';
+import { ContractorDashboard } from './pages/ContractorDashboard';
+import { ContractorProgressUploadPage } from './pages/ContractorProgressUploadPage';
 import { User } from './types';
 
 const ScrollToTop: React.FC = () => {
@@ -68,6 +70,8 @@ export const App: React.FC = () => {
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
+              <Route path="/contractor" element={<ContractorDashboard />} />
+              <Route path="/contractor/projects/:id/progress/new" element={<ContractorProgressUploadPage />} />
               <Route path="/citizen" element={<CitizenDashboard />} />
               <Route path="/citizen/report" element={<ReportCivicIssuePage />} />
               <Route path="/citizen/reports" element={<MyCivicReportsPage />} />

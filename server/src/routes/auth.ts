@@ -17,7 +17,7 @@ const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
   password: passwordSchema,
-  role: z.enum(['CITIZEN', 'INSPECTOR', 'ADMIN']).default('CITIZEN'),
+  role: z.enum(['CITIZEN', 'INSPECTOR', 'ADMIN', 'CONTRACTOR']).default('CITIZEN'),
 });
 
 const loginSchema = z.object({
@@ -47,6 +47,13 @@ const demoUsers = [
     email: 'admin@makkalsaantru.gov.in',
     passwordHash: bcrypt.hashSync('admin123', 10),
     role: 'ADMIN' as const,
+  },
+  {
+    id: 'demo-contractor-1',
+    name: 'Suresh Infrastructure Pvt Ltd (Contractor)',
+    email: 'contractor@makkalsaantru.gov.in',
+    passwordHash: bcrypt.hashSync('contractor123', 10),
+    role: 'CONTRACTOR' as const,
   },
 ];
 

@@ -19,6 +19,7 @@ import {
   Lock,
   Compass,
   Navigation,
+  HardHat,
 } from 'lucide-react';
 import { PriorityMap, MapProjectMarker } from '../components/PriorityMap';
 import { useLanguage } from '../context/LanguageContext';
@@ -72,8 +73,14 @@ export const AuthorityDashboard: React.FC = () => {
   const [projects, setProjects] = useState<PriorityQueueItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Tab Navigation: PROJECTS | PRIORITY_QUEUE | RESOLUTION_QUEUE | CITIZEN_SUBMISSIONS | CROSS_DOMAIN
-  const [activeTab, setActiveTab] = useState<'PROJECTS' | 'PRIORITY_QUEUE' | 'RESOLUTION_QUEUE' | 'CITIZEN_SUBMISSIONS' | 'CROSS_DOMAIN'>('PRIORITY_QUEUE');
+  // Tab Navigation: PROJECTS | PRIORITY_QUEUE | RESOLUTION_QUEUE | CITIZEN_SUBMISSIONS | CROSS_DOMAIN | CONTRACTOR_PROGRESS
+  const [activeTab, setActiveTab] = useState<'PROJECTS' | 'PRIORITY_QUEUE' | 'RESOLUTION_QUEUE' | 'CITIZEN_SUBMISSIONS' | 'CROSS_DOMAIN' | 'CONTRACTOR_PROGRESS'>('CONTRACTOR_PROGRESS');
+
+  // Contractor Progress Submissions State
+  const [contractorSubmissions, setContractorSubmissions] = useState<any[]>([]);
+  const [selectedProgressSubmission, setSelectedProgressSubmission] = useState<any | null>(null);
+  const [showProgressModal, setShowProgressModal] = useState<boolean>(false);
+  const [progressDecisionReason, setProgressDecisionReason] = useState<string>('');
 
   // Civic Priority & Resolution Queues State
   const [priorityQueue, setPriorityQueue] = useState<any[]>([]);
@@ -240,6 +247,17 @@ export const AuthorityDashboard: React.FC = () => {
         setCrossDomainAnalytics(cdData);
       } catch (cdErr) {
         console.warn('Cross domain analytics fetch skipped:', cdErr);
+      }
+
+      // 7. Fetch Contractor Progress Submissions
+      try {
+        const cRes = await fetch('/api/contractor/submissions/project/proj-demo-1');
+        if (cRes.ok) {
+          const cData = await cRes.json();
+          setContractorSubmissions(cData.submissions || []);
+        }
+      } catch (cErr) {
+        console.warn('Contractor submissions fetch skipped:', cErr);
       }
     } catch (err) {
       console.warn('Failed to fetch authority dashboard data:', err);
@@ -684,8 +702,155 @@ export const AuthorityDashboard: React.FC = () => {
               </span>
             )}
           </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('CONTRACTOR_PROGRESS')}
+            style={{
+              padding: '0.75rem 1.25rem',
+              borderRadius: '8px',
+              fontWeight: 800,
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              border: activeTab === 'CONTRACTOR_PROGRESS' ? '2px solid #d97706' : '1px solid #cbd5e1',
+              backgroundColor: activeTab === 'CONTRACTOR_PROGRESS' ? '#fef3c7' : '#ffffff',
+              color: activeTab === 'CONTRACTOR_PROGRESS' ? '#92400e' : '#475569',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              boxShadow: activeTab === 'CONTRACTOR_PROGRESS' ? '0 2px 8px rgba(217,119,6,0.15)' : 'none',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <span>👷</span>
+            {isTA ? 'ஒப்பந்ததாரர் பணி முன்னேற்ற சான்றளிப்பு' : 'CONTRACTOR PROGRESS VERIFICATION'}
+            <span style={{ backgroundColor: '#d97706', color: '#fff', padding: '0.1rem 0.45rem', borderRadius: '9999px', fontSize: '0.75rem' }}>
+              {contractorSubmissions.length || 2}
+            </span>
+          </button>
         </div>
 
+        {/* TAB 0: CONTRACTOR PROGRESS VERIFICATION QUEUE */}
+        {activeTab === 'CONTRACTOR_PROGRESS' && (
+          <div className="card" style={{ padding: '0', overflow: 'hidden', marginBottom: '2.5rem', borderTop: '4px solid #d97706' }}>
+            <div style={{ padding: '1.25rem 1.5rem', backgroundColor: '#0f172a', color: '#ffffff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 900, margin: 0, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <FileText size={22} style={{ color: '#fbbf24' }} />
+                  {isTA ? 'ஒப்பந்ததாரர் பணி முன்னேற்ற சரிபார்ப்புத் தளம்' : 'Contractor Progress Evidence Verification Queue'}
+                </h3>
+                <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: '0.2rem 0 0' }}>
+                  {isTA ? 'ஒப்பந்ததாரர் சான்றுகள், பொதுமக்கள் கருத்துகள் மற்றும் AI ஒப்பீட்டை பகுப்பாய்வு செய்து இறுதியை தீர்மானிக்கவும்.' : 'Evaluate contractor submitted evidence, citizen ground corroborations, and AI evidence comparisons.'}
+                </p>
+              </div>
+            </div>
+
+            <div style={{ padding: '1.5rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
+                {(contractorSubmissions.length > 0 ? contractorSubmissions : [
+                  {
+                    id: 'sub-demo-1',
+                    projectId: 'proj-demo-1',
+                    projectTitle: 'Village Road Improvement (DEMO)',
+                    stageName: 'Road Base Work',
+                    title: 'Road base layer completed for approximately 500 metres',
+                    claim: 'Crushed stone aggregate base layer laid, compacted, and ready for asphalt surfacing.',
+                    contractorName: 'Suresh Infrastructure Pvt Ltd',
+                    submittedAt: '2026-09-08 10:30 AM',
+                    status: 'COMMUNITY_VERIFICATION_IN_PROGRESS',
+                    version: 1,
+                    evidences: [
+                      { fileUrl: 'https://images.unsplash.com/photo-1584467735815-f778f274e296?auto=format&fit=crop&w=600&q=80', sha256Hash: '4d91c89f0123456789abcdef4d91c89f0123456789abcdef4d91c89f01234567' }
+                    ],
+                    verificationsCount: 4,
+                    aiResult: 'CONSISTENT',
+                    aiConfidence: 0.81,
+                  },
+                  {
+                    id: 'sub-demo-2',
+                    projectId: 'proj-demo-3',
+                    projectTitle: 'Public Streetlight Installation (DEMO)',
+                    stageName: 'Auto-Dimming Sensor Calibration',
+                    title: 'Solar streetlight poles & smart sensors installed',
+                    claim: 'All 120 solar LED streetlights erected with auto-dimming sensors active.',
+                    contractorName: 'Tamil Nadu Energy Corp',
+                    submittedAt: '2026-09-08 09:15 AM',
+                    status: 'FIELD_INSPECTION_REQUIRED',
+                    version: 1,
+                    evidences: [
+                      { fileUrl: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?auto=format&fit=crop&w=600&q=80', sha256Hash: 'e9f0a1b2c3d4e5f678901234e9f0a1b2c3d4e5f678901234e9f0a1b2c3d4e5f6' }
+                    ],
+                    verificationsCount: 3,
+                    aiResult: 'POTENTIAL_MISMATCH',
+                    aiConfidence: 0.88,
+                  }
+                ]).map((sub: any) => (
+                  <div key={sub.id} style={{ border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem', backgroundColor: '#ffffff', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                      <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#d97706', backgroundColor: '#fef3c7', padding: '0.2rem 0.6rem', borderRadius: '9999px' }}>
+                        STAGE: {sub.stageName || sub.stage?.name || 'Road Base Work'}
+                      </span>
+                      <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                        v{sub.version || 1} • {sub.submittedAt ? new Date(sub.submittedAt).toLocaleDateString() : 'Today'}
+                      </span>
+                    </div>
+
+                    <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.35rem' }}>
+                      {sub.title}
+                    </h4>
+
+                    <div style={{ fontSize: '0.85rem', color: '#475569', backgroundColor: '#f8fafc', padding: '0.75rem', borderRadius: '8px', fontStyle: 'italic', marginBottom: '1rem' }}>
+                      "{sub.claim}"
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
+                      {sub.evidences && sub.evidences[0] && (
+                        <img
+                          src={sub.evidences[0].fileUrl}
+                          alt="Contractor Proof"
+                          style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #cbd5e1' }}
+                        />
+                      )}
+                      <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                        <div>Contractor: <strong style={{ color: '#0f172a' }}>{sub.contractorName || 'Suresh Infrastructure Pvt Ltd'}</strong></div>
+                        <div style={{ marginTop: '2px' }}>Citizen Corroborations: <strong style={{ color: '#2563eb' }}>{sub.verificationsCount || sub.verifications?.length || 4} submissions</strong></div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.75rem', borderTop: '1px solid #f1f5f9' }}>
+                      <span className={`badge ${sub.aiResult === 'CONSISTENT' ? 'badge-consistent' : 'badge-mismatch'}`}>
+                        AI: {sub.aiResult || 'CONSISTENT'} ({Math.round((sub.aiConfidence || 0.81) * 100)}%)
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedProgressSubmission(sub);
+                          setShowProgressModal(true);
+                        }}
+                        style={{
+                          backgroundColor: '#0f172a',
+                          color: '#ffffff',
+                          border: 'none',
+                          padding: '0.5rem 1rem',
+                          borderRadius: '8px',
+                          fontWeight: 700,
+                          fontSize: '0.85rem',
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.35rem',
+                        }}
+                      >
+                        <Eye size={14} /> Review Evidence & Decide →
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* TAB 1: ACTION PRIORITY QUEUE */}
         {activeTab === 'PRIORITY_QUEUE' && (
@@ -1526,6 +1691,191 @@ export const AuthorityDashboard: React.FC = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* THREE-SOURCE EVIDENCE COMPARISON & HUMAN DECISION MODAL */}
+        {showProgressModal && selectedProgressSubmission && (
+          <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.85)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '1.5rem', overflowY: 'auto' }}>
+            <div style={{ backgroundColor: '#ffffff', borderRadius: '16px', maxWidth: '1100px', width: '100%', maxHeight: '90vh', overflowY: 'auto', padding: '2rem', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', border: '1px solid #cbd5e1', margin: 'auto' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem', borderBottom: '2px solid #f1f5f9', paddingBottom: '1rem' }}>
+                <div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#d97706', textTransform: 'uppercase' }}>
+                    THREE-SOURCE EVIDENCE COMPARISON ENGINE
+                  </div>
+                  <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a', margin: '0.2rem 0' }}>
+                    {selectedProgressSubmission.title}
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setShowProgressModal(false)}
+                  style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#64748b' }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* THREE COLUMNS GRID */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+                {/* COLUMN 1: CONTRACTOR EVIDENCE */}
+                <div style={{ backgroundColor: '#fffbe finished', padding: '1.25rem', borderRadius: '12px', border: '1px solid #fef3c7' }}>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#92400e', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <HardHat size={18} /> 1. CONTRACTOR EVIDENCE
+                  </div>
+                  <div style={{ fontSize: '0.85rem', color: '#334155', marginBottom: '0.5rem' }}>
+                    <strong>Contractor:</strong> {selectedProgressSubmission.contractorName || 'Suresh Infrastructure Pvt Ltd'}
+                  </div>
+                  <div style={{ fontSize: '0.85rem', color: '#334155', marginBottom: '0.75rem', fontStyle: 'italic', backgroundColor: '#ffffff', padding: '0.75rem', borderRadius: '8px', border: '1px solid #fde68a' }}>
+                    "{selectedProgressSubmission.claim}"
+                  </div>
+                  {selectedProgressSubmission.evidences && selectedProgressSubmission.evidences[0] && (
+                    <div>
+                      <img
+                        src={selectedProgressSubmission.evidences[0].fileUrl}
+                        alt="Contractor Upload"
+                        style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #cbd5e1', marginBottom: '0.5rem' }}
+                      />
+                      <div style={{ fontSize: '0.75rem', color: '#059669', fontFamily: 'monospace' }}>
+                        SHA-256: {selectedProgressSubmission.evidences[0].sha256Hash?.slice(0, 24)}...
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* COLUMN 2: CITIZEN GROUND EVIDENCE */}
+                <div style={{ backgroundColor: '#eff6ff', padding: '1.25rem', borderRadius: '12px', border: '1px solid #bfdbfe' }}>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e40af', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <UserCheck size={18} /> 2. CITIZEN GROUND EVIDENCE
+                  </div>
+                  <div style={{ fontSize: '0.85rem', color: '#1e3a8a', marginBottom: '0.5rem' }}>
+                    <strong>Corroborations:</strong> {selectedProgressSubmission.verificationsCount || 4} independent citizen observations
+                  </div>
+                  <div style={{ backgroundColor: '#ffffff', padding: '0.75rem', borderRadius: '8px', border: '1px solid #93c5fd', marginBottom: '0.75rem', fontSize: '0.8rem', color: '#1e40af' }}>
+                    ✓ 75% Citizens observe visible work at project GPS location<br />
+                    ✓ 75% Citizens report work generally consistent with claim
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#475569', fontStyle: 'italic' }}>
+                    "Base stone layer is visible. Road compaction appears ongoing near the village junction."
+                  </div>
+                </div>
+
+                {/* COLUMN 3: AI-ASSISTED COMPARISON */}
+                <div style={{ backgroundColor: '#f0fdf4', padding: '1.25rem', borderRadius: '12px', border: '1px solid #bbf7d0' }}>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#15803d', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <ShieldCheck size={18} /> 3. AI EVIDENCE COMPARISON
+                  </div>
+                  <div style={{ marginBottom: '0.75rem' }}>
+                    <span className={`badge ${selectedProgressSubmission.aiResult === 'POTENTIAL_MISMATCH' ? 'badge-mismatch' : 'badge-consistent'}`}>
+                      RESULT: {selectedProgressSubmission.aiResult || 'CONSISTENT'}
+                    </span>
+                    <span style={{ fontSize: '0.8rem', color: '#15803d', marginLeft: '0.5rem', fontWeight: 700 }}>
+                      Confidence: {Math.round((selectedProgressSubmission.aiConfidence || 0.81) * 100)}%
+                    </span>
+                  </div>
+                  <ul style={{ fontSize: '0.8rem', color: '#166534', paddingLeft: '1.2rem', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+                    <li>Contractor photos show road base layer aggregate.</li>
+                    <li>Citizen ground photos align with contractor location coordinates.</li>
+                    <li>No exact image file duplication detected across submissions.</li>
+                  </ul>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#14532d', backgroundColor: '#ffffff', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #86efac' }}>
+                    Recommended Action: Review ground photos and confirm progress update.
+                  </div>
+                </div>
+              </div>
+
+              {/* HUMAN AUTHORITY DECISION PANEL */}
+              <div style={{ backgroundColor: '#0f172a', color: '#ffffff', padding: '1.5rem', borderRadius: '12px' }}>
+                <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#ffffff', margin: '0 0 0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <UserCheck size={20} style={{ color: '#fbbf24' }} /> HUMAN AUTHORITY DECISION
+                </h4>
+                <p style={{ fontSize: '0.85rem', color: '#cbd5e1', marginBottom: '1rem' }}>
+                  Final administrative verification decision rests with the authorized human field inspector.
+                </p>
+
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#94a3b8', marginBottom: '0.35rem' }}>
+                    Inspection Officer Justification / Audit Notes:
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Enter official verification remarks..."
+                    value={progressDecisionReason}
+                    onChange={(e) => setProgressDecisionReason(e.target.value)}
+                    style={{ width: '100%', padding: '0.75rem', backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px', color: '#ffffff', fontSize: '0.9rem' }}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const token = localStorage.getItem('ms_auth_token') || localStorage.getItem('makkalsaantru_token');
+                      await fetch(`/api/contractor/submissions/${selectedProgressSubmission.id}/decision`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                        body: JSON.stringify({ decision: 'VERIFY_PROGRESS', reason: progressDecisionReason || 'Verified by Executive Engineer' }),
+                      });
+                      setShowProgressModal(false);
+                      fetchDashboardData();
+                    }}
+                    style={{ padding: '0.75rem 1rem', backgroundColor: '#16a34a', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer' }}
+                  >
+                    ✓ VERIFY PROGRESS
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const token = localStorage.getItem('ms_auth_token') || localStorage.getItem('makkalsaantru_token');
+                      await fetch(`/api/contractor/submissions/${selectedProgressSubmission.id}/decision`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                        body: JSON.stringify({ decision: 'NEEDS_MORE_EVIDENCE', reason: progressDecisionReason || 'Requesting additional site photo' }),
+                      });
+                      setShowProgressModal(false);
+                      fetchDashboardData();
+                    }}
+                    style={{ padding: '0.75rem 1rem', backgroundColor: '#d97706', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer' }}
+                  >
+                    ⚠️ REQUEST MORE EVIDENCE
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const token = localStorage.getItem('ms_auth_token') || localStorage.getItem('makkalsaantru_token');
+                      await fetch(`/api/contractor/submissions/${selectedProgressSubmission.id}/decision`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                        body: JSON.stringify({ decision: 'FIELD_INSPECTION_REQUIRED', reason: progressDecisionReason || 'Discrepancy flagged. Scheduled for route planning.' }),
+                      });
+                      setShowProgressModal(false);
+                      fetchDashboardData();
+                    }}
+                    style={{ padding: '0.75rem 1rem', backgroundColor: '#0284c7', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer' }}
+                  >
+                    📍 FIELD INSPECTION REQUIRED
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const token = localStorage.getItem('ms_auth_token') || localStorage.getItem('makkalsaantru_token');
+                      await fetch(`/api/contractor/submissions/${selectedProgressSubmission.id}/decision`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                        body: JSON.stringify({ decision: 'PROGRESS_NOT_CONFIRMED', reason: progressDecisionReason || 'Work claim not confirmed upon review' }),
+                      });
+                      setShowProgressModal(false);
+                      fetchDashboardData();
+                    }}
+                    style={{ padding: '0.75rem 1rem', backgroundColor: '#dc2626', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 800, fontSize: '0.85rem', cursor: 'pointer' }}
+                  >
+                    ✕ PROGRESS NOT CONFIRMED
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}

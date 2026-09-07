@@ -11,24 +11,59 @@ This document provides a step-by-step evaluation guide for hackathon judges to e
 
 | Role | Username / Email | Password | Primary Workspace Route | Purpose |
 | :--- | :--- | :--- | :--- | :--- |
-| **Citizen** | `citizen@makkalsaantru.gov.in` | `citizen123` | `/citizen` | Verification wizard, Civic issue reporting, Offline sync |
-| **Inspector** | `inspector@makkalsaantru.gov.in` | `inspector123` | `/authority` | Case management, Priority queue, Route planner, Resolution proof |
+| **Contractor** | `contractor@makkalsaantru.gov.in` | `contractor123` | `/contractor` | Upload work stage progress evidence & respond to audit requests |
+| **Citizen** | `citizen@makkalsaantru.gov.in` | `citizen123` | `/citizen` | Verify contractor claims, Civic issue reporting, Offline sync |
+| **Inspector** | `inspector@makkalsaantru.gov.in` | `inspector123` | `/authority` | Three-Source Evidence Comparison, Priority queue, Route planner |
 | **Administrator** | `admin@makkalsaantru.gov.in` | `admin123` | `/admin/security` | Audit trail, Authority directory, Security events |
 
 ---
 
-## 🎯 1. Citizen Verification Wizard (Public Work Progress)
+## 🎯 1. Evidence-Driven Public Work Verification (Judge Primary Demo Flow)
 
-1. Open `http://localhost:5173/` and log in as **Citizen** (`citizen@makkalsaantru.gov.in` / `citizen123`).
-2. Navigate to **Public Projects** (`/projects`) and select project `MS-ROAD-001` (Mount Road Resurfacing Phase 2).
-3. Click **Submit Progress Verification**.
-4. Step through the 6-step wizard:
-   - **Step 1 (Milestone)**: Select milestone **50% (Sub-Base Completed)**.
-   - **Step 2 (Evidence Upload)**: Upload ground photo & record optional audio note.
-   - **Step 3 (Location)**: Capture device GPS coordinates (verifies proximity against target project location).
-   - **Step 4 (Questions)**: Answer structural condition questions.
-   - **Step 5 (Review)**: Inspect cryptographic SHA-256 fingerprint generated for evidence.
-   - **Step 6 (Submit)**: Click submit to register verification.
+```
+CONTRACTOR UPLOADS ACTUAL PROGRESS EVIDENCE
+                     ↓
+CITIZENS / AUTHORIZED INSPECTORS VERIFY THAT EVIDENCE
+                     ↓
+AI ASSISTS IN COMPARING CLAIMED WORK WITH GROUND EVIDENCE
+                     ↓
+HUMAN AUTHORITY MAKES THE FINAL DECISION
+```
+
+### Step-by-Step Judge Walkthrough:
+
+1. **Log in as Contractor**:
+   - Navigate to `http://localhost:5173/login` and select **Official Contractor** (`contractor@makkalsaantru.gov.in` / `contractor123`).
+   - Open assigned project **Village Road Improvement**.
+   - Click **UPLOAD PROGRESS EVIDENCE**.
+   - Select Stage 2: **Road Base Work**.
+   - Enter Title: *"Road base layer completed for 500 metres"*.
+   - Upload ground photo & click **SUBMIT EVIDENCE FOR VERIFICATION**.
+   - Server returns SHA-256 evidence fingerprint.
+
+2. **Log in as Citizen**:
+   - Log in as **Citizen** (`citizen@makkalsaantru.gov.in` / `citizen123`).
+   - Open **Village Road Improvement** (`/citizen/projects/proj-demo-1`).
+   - Observe the **Contractor Progress Evidence Card** showing the contractor's claimed work and photo.
+   - Click **VERIFY THIS WORK**.
+   - Answer observable ground questions:
+     1. *Can you observe this work at the reported location?* (**YES**)
+     2. *Does visible work appear consistent with contractor evidence?* (**YES**)
+     3. *Provide optional current photo and notes.*
+   - Click **SUBMIT EVIDENCE**.
+
+3. **Log in as Inspector & Review Evidence**:
+   - Log in as **Inspector** (`inspector@makkalsaantru.gov.in` / `inspector123`).
+   - Navigate to **Authority Dashboard** (`/authority`).
+   - Open tab **CONTRACTOR PROGRESS VERIFICATION**.
+   - Click **Review Evidence & Decide** to open the **Three-Source Evidence Comparison Modal**.
+   - Observe side-by-side synthesis:
+     - **Column 1 (CONTRACTOR EVIDENCE)**: Submitted claim, photo, timestamp, version, SHA-256 hash.
+     - **Column 2 (CITIZEN GROUND EVIDENCE)**: 4 independent citizen observations, 75% consistency ratio, citizen photos.
+     - **Column 3 (AI-ASSISTED COMPARISON)**: 81% Confidence, visual observations list, recommended action.
+   - Record Human Authority Decision:
+     - Click **✓ VERIFY PROGRESS** (to approve stage), or
+     - Click **📍 FIELD INSPECTION REQUIRED** (automatically routes case to **Inspector Route Planner**).
 
 ---
 
@@ -36,35 +71,22 @@ This document provides a step-by-step evaluation guide for hackathon judges to e
 
 1. Navigate to `/citizen/report` or click **Report Civic Issue**.
 2. Upload a photo of a road pothole or drainage issue.
-3. System runs AI Issue Identification (or heuristic fallback) and classifies the problem into one of 9 domain categories (e.g. `ROAD` / `DRAINAGE`).
-4. Category + GPS automatically route report to the deterministic Authority Directory (e.g., *Greater Chennai Corporation — PWD*).
-5. Generate a formal structured complaint letter with tracking code `MS-CIV-2026-XXXXX` and export printable PDF proof.
+3. System runs AI Issue Identification (or heuristic fallback) and classifies the problem into one of 9 domain categories (`ROAD`, `DRAINAGE`, etc.).
+4. Category + GPS automatically route report to the deterministic Authority Directory (*Greater Chennai Corporation — PWD*).
+5. Generate formal structured complaint letter with tracking code `MS-CIV-2026-XXXXX` and export printable PDF proof.
 
 ---
 
-## ⚡ 3. Resource Intelligence & Authority Dashboard
-
-1. Log in as **Inspector** (`inspector@makkalsaantru.gov.in` / `inspector123`).
-2. Navigate to **Authority Dashboard** (`/authority`).
-3. View **Priority Intelligence Queue**:
-   - Cases ranked strictly by 0–100 **Action Priority Score**.
-   - Notice color-coded priority badges: `CRITICAL` (80+), `HIGH` (60–79), `MEDIUM` (40–59), `LOW` (<40).
-4. Review **Cross-Department Case Detection**:
-   - Observe multi-domain issue links (`WATER_SUPPLY` + `ROAD`, `SEWAGE` + `DRAINAGE`).
-   - View structured sequential action dependency plans.
-
----
-
-## 🗺️ 4. Civic Intelligence Heatmap & Inspector Route Planner
+## 🗺️ 3. Civic Intelligence Heatmap & Inspector Route Planner
 
 1. Navigate to **Civic Map** (`/authority/civic-map`).
 2. Explore density hotspot clusters (250m radius aggregation) and area risk indicators.
 3. Navigate to **Inspector Route Planner** (`/authority/route-planner`).
-4. Select high-priority target inspection sites and generate optimal multi-stop inspection routes prioritized by urgency and proximity.
+4. Select high-priority target inspection sites (including cases marked `FIELD_INSPECTION_REQUIRED`) and generate optimal multi-stop inspection routes prioritized by urgency and proximity.
 
 ---
 
-## 📸 5. Before → After Resolution Proof
+## 📸 4. Before → After Resolution Proof
 
 1. Open a completed corrective action item in `/authority`.
 2. Upload the **After Repair Photo**.
@@ -72,7 +94,7 @@ This document provides a step-by-step evaluation guide for hackathon judges to e
 
 ---
 
-## 🛡️ 6. Cybersecurity & Admin Audit Dashboard
+## 🛡️ 5. Cybersecurity & Admin Audit Dashboard
 
 1. Log in as **Administrator** (`admin@makkalsaantru.gov.in` / `admin123`).
 2. Navigate to `/admin/security`:

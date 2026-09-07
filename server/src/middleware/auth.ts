@@ -7,7 +7,7 @@ export interface AuthUserPayload {
   id: string;
   email: string;
   name: string;
-  role: 'CITIZEN' | 'INSPECTOR' | 'ADMIN';
+  role: 'CITIZEN' | 'INSPECTOR' | 'ADMIN' | 'CONTRACTOR';
 }
 
 export interface AuthenticatedRequest extends Request {
@@ -46,7 +46,7 @@ export function authenticateToken(req: AuthenticatedRequest, res: Response, next
  * Role-Based Access Control (RBAC) middleware.
  * Restricts access to specific user roles.
  */
-export function requireRole(allowedRoles: Array<'CITIZEN' | 'INSPECTOR' | 'ADMIN'>) {
+export function requireRole(allowedRoles: Array<'CITIZEN' | 'INSPECTOR' | 'ADMIN' | 'CONTRACTOR'>) {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json({ error: 'Unauthorized.' });

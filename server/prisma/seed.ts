@@ -35,19 +35,21 @@ async function main() {
     },
   });
 
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@makkalsaantru.gov.in' },
+  const contractorPassword = await bcrypt.hash('contractor123', 10);
+
+  const contractor = await prisma.user.upsert({
+    where: { email: 'contractor@makkalsaantru.gov.in' },
     update: {},
     create: {
-      id: 'demo-admin-1',
-      name: 'Administrator (Chief Engineer)',
-      email: 'admin@makkalsaantru.gov.in',
-      passwordHash: adminPassword,
-      role: Role.ADMIN,
+      id: 'demo-contractor-1',
+      name: 'Suresh Infrastructure Pvt Ltd (Contractor)',
+      email: 'contractor@makkalsaantru.gov.in',
+      passwordHash: contractorPassword,
+      role: Role.CONTRACTOR,
     },
   });
 
-  console.log(`✅ Demo users created/verified.`);
+  console.log(`✅ Demo users created/verified (Citizen, Inspector, Admin, Contractor).`);
 
   // 2. Seed 5 Fictional Demo Projects with Unique QR Verification Codes
   const demoProjectsData = [

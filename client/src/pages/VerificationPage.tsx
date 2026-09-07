@@ -356,10 +356,15 @@ export const VerificationPage: React.FC = () => {
       if (milestoneMatch) formData.append('milestoneMatch', milestoneMatch);
       if (usableMaintained) formData.append('usableMaintained', usableMaintained);
       if (notes.trim()) formData.append('notes', notes.trim());
+      formData.append('observation', visibleWork || 'YES');
+      formData.append('consistencyResponse', milestoneMatch || 'YES');
 
       let token = await ensureCitizenToken();
 
-      let response = await fetch(`/api/projects/${id}/evidence`, {
+      const latestSub = project?.contractorSubmissions && project.contractorSubmissions.length > 0 ? project.contractorSubmissions[0] : null;
+      const targetUrl = latestSub ? `/api/contractor/submissions/${latestSub.id}/verify` : `/api/projects/${id}/evidence`;
+
+      let response = await fetch(targetUrl, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

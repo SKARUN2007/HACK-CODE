@@ -14,14 +14,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const isTA = language === 'TA';
   const navigate = useNavigate();
 
-  const [role, setRole] = useState<'CITIZEN' | 'INSPECTOR' | 'ADMIN'>('INSPECTOR');
+  const [role, setRole] = useState<'CITIZEN' | 'INSPECTOR' | 'ADMIN' | 'CONTRACTOR'>('INSPECTOR');
   const [email, setEmail] = useState('inspector@makkalsaantru.gov.in');
   const [password, setPassword] = useState('inspector123');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleRoleSelect = (selectedRole: 'CITIZEN' | 'INSPECTOR' | 'ADMIN') => {
+  const handleRoleSelect = (selectedRole: 'CITIZEN' | 'INSPECTOR' | 'ADMIN' | 'CONTRACTOR') => {
     setRole(selectedRole);
     setError(null);
     if (selectedRole === 'CITIZEN') {
@@ -30,6 +30,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     } else if (selectedRole === 'INSPECTOR') {
       setEmail('inspector@makkalsaantru.gov.in');
       setPassword('inspector123');
+    } else if (selectedRole === 'CONTRACTOR') {
+      setEmail('contractor@makkalsaantru.gov.in');
+      setPassword('contractor123');
     } else {
       setEmail('admin@makkalsaantru.gov.in');
       setPassword('admin123');
@@ -58,6 +61,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
       if (data.user.role === 'CITIZEN') {
         navigate('/citizen');
+      } else if (data.user.role === 'CONTRACTOR') {
+        navigate('/contractor');
       } else if (data.user.role === 'INSPECTOR') {
         navigate('/authority');
       } else if (data.user.role === 'ADMIN') {
@@ -233,6 +238,46 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
               </h3>
               <p style={{ fontSize: '0.84rem', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
                 {isTA ? 'SHA-256 தணிக்கைப் பதிவுகள், சைபர் நிகழ்வுகள் மற்றும் பயனாளிகள் மேலாண்மை கட்டுப்பாட்டு மையம்.' : 'Audit SHA-256 evidence chains, monitor real-time cyber security events, and manage system access.'}
+              </p>
+            </div>
+
+            {/* Persona 4: Contractor */}
+            <div
+              onClick={() => handleRoleSelect('CONTRACTOR')}
+              style={{
+                backgroundColor: role === 'CONTRACTOR' ? '#ffffff' : '#f8fafc',
+                border: role === 'CONTRACTOR' ? '2.5px solid #ea580c' : '1.5px solid #e2e8f0',
+                borderRadius: '14px',
+                padding: '1.35rem',
+                cursor: 'pointer',
+                boxShadow: role === 'CONTRACTOR' ? '0 12px 28px -6px rgba(234, 88, 12, 0.2)' : '0 2px 6px rgba(0,0,0,0.03)',
+                transition: 'all 0.25s ease',
+                position: 'relative',
+                overflow: 'hidden',
+              }}
+            >
+              <div style={{ height: '4px', backgroundColor: '#ea580c', position: 'absolute', top: 0, left: 0, right: 0 }} />
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: '#ffedd5', color: '#c2410c', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Sparkles size={24} />
+                </div>
+                {role === 'CONTRACTOR' ? (
+                  <span style={{ fontSize: '0.75rem', fontWeight: 800, backgroundColor: '#ea580c', color: '#ffffff', padding: '0.25rem 0.65rem', borderRadius: '9999px', display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>
+                    <CheckCircle2 size={13} /> {isTA ? 'தேர்வு செய்யப்பட்டது' : 'Selected'}
+                  </span>
+                ) : (
+                  <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 700 }}>
+                    {isTA ? 'கிளிக் செய்க' : 'Click to Select'}
+                  </span>
+                )}
+              </div>
+
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#002B49', marginBottom: '0.4rem' }}>
+                {isTA ? '4. ஒப்பந்ததாரர் (Contractor)' : '4. Official Contractor'}
+              </h3>
+              <p style={{ fontSize: '0.84rem', color: '#64748b', lineHeight: 1.5, margin: 0 }}>
+                {isTA ? 'முடிவுற்ற பணி நிலைகளுக்கான களச் புகைப்படச் சான்றுகளைப் பதிவேற்றி சரிபார்ப்புக்குச் சமர்ப்பிக்கவும்.' : 'Upload real-time ground progress photos for assigned public work stages and respond to inspector evidence requests.'}
               </p>
             </div>
 

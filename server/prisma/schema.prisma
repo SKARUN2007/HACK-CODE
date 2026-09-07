@@ -13,6 +13,7 @@ enum Role {
   CITIZEN
   INSPECTOR
   ADMIN
+  CONTRACTOR
 }
 
 enum ProjectStatus {
@@ -41,6 +42,7 @@ enum VerificationResult {
   CONSISTENT
   REVIEW
   POTENTIAL_MISMATCH
+  INSUFFICIENT_EVIDENCE
 }
 
 enum HumanStatus {
@@ -67,6 +69,10 @@ model User {
   assignedRoutes InspectionRoute[] @relation("InspectorRoutes")
   createdRoutes  InspectionRoute[] @relation("CreatedRoutes")
 
+  contractorSubmissions ContractorProgressSubmission[] @relation("ContractorSubmissions")
+  progressVerifications ProgressVerification[]        @relation("VerifierProgressVerifications")
+  progressDecisions     ProgressHumanDecision[]       @relation("InspectorProgressDecisions")
+
   @@map("users")
 }
 
@@ -86,6 +92,8 @@ model Project {
   updatedAt        DateTime      @updatedAt
 
   milestones       Milestone[]
+  stages           ProjectStage[]
+  contractorSubmissions ContractorProgressSubmission[]
   evidences        Evidence[]
   verifications    Verification[]
 
@@ -505,5 +513,121 @@ model InspectionRouteStop {
   @@index([routeId, sequence])
   @@map("inspection_route_stops")
 }
+
+// -----------------------------------------------------------------------------
+// EVIDENCE-DRIVEN CONTRACTOR & PUBLIC WORK VERIFICATION MODELS
+// -----------------------------------------------------------------------------
+
+model ProjectStage {
+  id          String   @id @default(uuid())
+  projectId   String
+  name        String   // e.g. "Site Preparation", "Road Base Work", "Surface Work"
+  description String?
+  sequence    Int      // 1, 2, 3...
+  required    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project     Project                        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  submissions ContractorProgressSubmission[]
+
+  @@map("project_stages")
+}
+
+model ContractorProgressSubmission {
+  id             String   @id @default(uuid())
+  projectId      String
+  projectStageId String
+  contractorId   String
+  title          String   // e.g. "Road base layer completed for 500m stretch"
+  description    String
+  claim          String   // Specific work claim by contractor
+  status         String   @default("AWAITING_VERIFICATION") // AWAITING_VERIFICATION, COMMUNITY_VERIFICATION_IN_PROGRESS, AI_ANALYZED, HUMAN_REVIEW_REQUIRED, FIELD_INSPECTION_REQUIRED, VERIFIED, NOT_CONFIRMED, MORE_EVIDENCE_REQUIRED, SUPERSEDED
+  version        Int      @default(1)
+  submittedAt    DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  project       Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  stage         ProjectStage           @relation(fields: [projectStageId], references: [id], onDelete: Cascade)
+  contractor    User                   @relation("ContractorSubmissions", fields: [contractorId], references: [id])
+  evidences     ProgressEvidence[]
+  verifications ProgressVerification[]
+  analyses      ProgressAnalysis[]
+  decisions     ProgressHumanDecision[]
+
+  @@map("contractor_progress_submissions")
+}
+
+model ProgressEvidence {
+  id               String   @id @default(uuid())
+  submissionId     String
+  evidenceType     String   @default("PHOTO") // PHOTO, VIDEO, AUDIO
+  fileUrl          String
+  latitude         Float?
+  longitude        Float?
+  capturedAt       DateTime @default(now())
+  serverReceivedAt DateTime @default(now())
+  sha256Hash       String
+  createdAt        DateTime @default(now())
+
+  submission       ContractorProgressSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@map("progress_evidences")
+}
+
+model ProgressVerification {
+  id                  String   @id @default(uuid())
+  submissionId        String
+  verifierId          String
+  verifierRole        Role     @default(CITIZEN) // CITIZEN, INSPECTOR, ADMIN
+  observation         String   // YES, NO, UNSURE (Work visible?)
+  consistencyResponse String   // YES, NO, UNSURE (Consistent with contractor claim?)
+  comment             String?
+  photoUrl            String?
+  voiceUrl            String?
+  latitude            Float?
+  longitude           Float?
+  distanceFromProject Float?
+  sha256Hash          String?
+  createdAt           DateTime @default(now())
+
+  submission          ContractorProgressSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  verifier            User                         @relation("VerifierProgressVerifications", fields: [verifierId], references: [id])
+
+  @@map("progress_verifications")
+}
+
+model ProgressAnalysis {
+  id                     String             @id @default(uuid())
+  submissionId           String
+  result                 VerificationResult @default(REVIEW) // CONSISTENT, REVIEW, POTENTIAL_MISMATCH, INSUFFICIENT_EVIDENCE
+  confidence             Float              @default(0.80)
+  explanation            String
+  observations           String             // JSON string array of visual observations
+  recommendedHumanAction String?
+  provider               String             @default("mock")
+  analysisVersion        String             @default("1.0")
+  createdAt              DateTime           @default(now())
+
+  submission             ContractorProgressSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@map("progress_analyses")
+}
+
+model ProgressHumanDecision {
+  id           String   @id @default(uuid())
+  submissionId String
+  inspectorId  String
+  decision     String   // VERIFY_PROGRESS, NEEDS_MORE_EVIDENCE, FIELD_INSPECTION_REQUIRED, PROGRESS_NOT_CONFIRMED
+  reason       String?
+  decidedAt    DateTime @default(now())
+
+  submission   ContractorProgressSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  inspector    User                         @relation("InspectorProgressDecisions", fields: [inspectorId], references: [id])
+
+  @@map("progress_human_decisions")
+}
+
 
 

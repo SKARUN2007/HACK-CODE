@@ -16,6 +16,7 @@ import {
   AlertCircle,
   XCircle,
 } from 'lucide-react';
+import { handleImageError } from '../utils/imageUtils';
 import { useLanguage } from '../context/LanguageContext';
 
 export const MyInspectionRoutesPage: React.FC = () => {
@@ -389,7 +390,7 @@ export const MyInspectionRoutesPage: React.FC = () => {
                         <div style={{ fontSize: '0.7rem', fontWeight: 800, padding: '0.3rem 0.6rem', backgroundColor: '#f1f5f9', color: '#475569' }}>
                           CITIZEN BEFORE PHOTO
                         </div>
-                        <img src={report.photoUrl} alt="Evidence" style={{ width: '100%', height: '140px', objectFit: 'cover' }} />
+                        <img src={report.photoUrl} alt="Evidence" onError={handleImageError} style={{ width: '100%', height: '140px', objectFit: 'cover' }} />
                       </div>
                     )}
                   </div>

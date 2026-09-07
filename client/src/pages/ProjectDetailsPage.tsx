@@ -17,6 +17,7 @@ import {
 import { Project, ContractorProgressSubmission, ProjectStage } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { getCategoryLabel, getTranslatedProject } from '../utils/projectTranslations';
+import { handleImageError, getEvidenceImageUrl } from '../utils/imageUtils';
 
 export const ProjectDetailsPage: React.FC = () => {
   const { language } = useLanguage();
@@ -243,8 +244,9 @@ export const ProjectDetailsPage: React.FC = () => {
               {latestSubmission.evidences && latestSubmission.evidences.length > 0 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
                   <img
-                    src={latestSubmission.evidences[0].fileUrl}
+                    src={getEvidenceImageUrl(latestSubmission.evidences[0])}
                     alt="Contractor Evidence"
+                    onError={handleImageError}
                     style={{ width: '120px', height: '90px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #cbd5e1' }}
                   />
                   <div style={{ fontSize: '0.8rem', color: '#64748b' }}>

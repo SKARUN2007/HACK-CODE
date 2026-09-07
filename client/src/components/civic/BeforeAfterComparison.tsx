@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowRight, CheckCircle2, ShieldCheck, Sparkles, AlertCircle, FileText } from 'lucide-react';
+import { handleImageError } from '../../utils/imageUtils';
 
 interface BeforeAfterComparisonProps {
   report?: any;
@@ -86,8 +87,8 @@ export const BeforeAfterComparison: React.FC<BeforeAfterComparisonProps> = ({
             BEFORE — ORIGINAL REPORT
           </div>
           <div style={{ height: '220px', borderRadius: '12px', overflow: 'hidden', backgroundColor: '#e2e8f0', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {beforePhotoUrl ? (
-              <img src={beforePhotoUrl} alt="Before Evidence" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            {bUrl ? (
+              <img src={bUrl} alt="Before Evidence" onError={handleImageError} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
               <span style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 700 }}>Original Evidence Photo</span>
             )}
@@ -112,8 +113,8 @@ export const BeforeAfterComparison: React.FC<BeforeAfterComparisonProps> = ({
             AFTER — CORRECTIVE EVIDENCE
           </div>
           <div style={{ height: '220px', borderRadius: '12px', overflow: 'hidden', backgroundColor: '#cbd5e1', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {afterPhotoUrl ? (
-              <img src={afterPhotoUrl} alt="After Evidence" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            {aUrl ? (
+              <img src={aUrl} alt="After Evidence" onError={handleImageError} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
               <span style={{ color: '#64748b', fontSize: '0.85rem', fontWeight: 700 }}>Awaiting After Evidence Photo</span>
             )}

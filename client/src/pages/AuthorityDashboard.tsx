@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { PriorityMap, MapProjectMarker } from '../components/PriorityMap';
 import { useLanguage } from '../context/LanguageContext';
+import { handleImageError, getEvidenceImageUrl } from '../utils/imageUtils';
 import { getCategoryLabel, getReportedStatusLabel, getTranslatedProject } from '../utils/projectTranslations';
 import { Logo } from '../components/Logo';
 import { TnEmblem } from '../components/TnEmblem';
@@ -806,8 +807,9 @@ export const AuthorityDashboard: React.FC = () => {
                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '1rem' }}>
                       {sub.evidences && sub.evidences[0] && (
                         <img
-                          src={sub.evidences[0].fileUrl}
+                          src={getEvidenceImageUrl(sub.evidences[0])}
                           alt="Contractor Proof"
+                          onError={handleImageError}
                           style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                         />
                       )}
@@ -1732,8 +1734,9 @@ export const AuthorityDashboard: React.FC = () => {
                   {selectedProgressSubmission.evidences && selectedProgressSubmission.evidences[0] && (
                     <div>
                       <img
-                        src={selectedProgressSubmission.evidences[0].fileUrl}
+                        src={getEvidenceImageUrl(selectedProgressSubmission.evidences[0])}
                         alt="Contractor Upload"
+                        onError={handleImageError}
                         style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #cbd5e1', marginBottom: '0.5rem' }}
                       />
                       <div style={{ fontSize: '0.75rem', color: '#059669', fontFamily: 'monospace' }}>

@@ -18,6 +18,7 @@ import {
   Info,
 } from 'lucide-react';
 import { Project, ContractorProgressSubmission } from '../types';
+import { handleImageError, getEvidenceImageUrl } from '../utils/imageUtils';
 
 export const ContractorDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -606,8 +607,9 @@ export const ContractorDashboard: React.FC = () => {
                                 }}
                               >
                                 <img
-                                  src={latestSubmission.evidences[0].fileUrl}
+                                  src={getEvidenceImageUrl(latestSubmission.evidences[0])}
                                   alt="Contractor Evidence"
+                                  onError={handleImageError}
                                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
                               </div>

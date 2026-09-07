@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ShieldCheck, MapPin, Clock, Camera, Mic, CheckCircle2, AlertTriangle, ArrowLeft, RefreshCw, Lock } from 'lucide-react';
 import { Evidence } from '../types';
+import { handleImageError } from '../utils/imageUtils';
 import { AIVerificationPanel, VerificationData } from '../components/AIVerificationPanel';
 import { SecurityPanel } from '../components/SecurityPanel';
 
@@ -143,7 +144,7 @@ export const AuthorityTrustViewPage: React.FC = () => {
                 <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#475569', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                   <Camera size={16} /> Submitted Ground Photo
                 </h4>
-                <img src={evidence.photoUrl} alt="Ground Evidence" style={{ width: '100%', borderRadius: '8px', border: '1px solid #cbd5e1', maxHeight: '260px', objectFit: 'cover' }} />
+                <img src={evidence.photoUrl} alt="Ground Evidence" onError={handleImageError} style={{ width: '100%', borderRadius: '8px', border: '1px solid #cbd5e1', maxHeight: '260px', objectFit: 'cover' }} />
               </div>
             ) : (
               <div style={{ backgroundColor: '#f8fafc', padding: '1.5rem', borderRadius: '8px', border: '1px dashed #cbd5e1', textAlign: 'center', color: '#94a3b8', fontSize: '0.85rem' }}>

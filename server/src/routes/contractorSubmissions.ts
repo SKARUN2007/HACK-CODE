@@ -1,7 +1,8 @@
 import { Router, Response } from 'express';
 import fs from 'fs';
+import jwt from 'jsonwebtoken';
 import { PrismaClient, VerificationResult } from '@prisma/client';
-import { authenticateToken, requireRole, AuthenticatedRequest } from '../middleware/auth';
+import { authenticateToken, requireRole, AuthenticatedRequest, AuthUserPayload } from '../middleware/auth';
 import { uploadMiddleware } from '../middleware/upload';
 import { computeSHA256 } from '../utils/crypto';
 import { calculateHaversineDistance } from '../utils/geo';
@@ -13,6 +14,7 @@ import { ProgressEvidenceComparisonService } from '../services/civic/progressCom
 const router = Router();
 const prisma = new PrismaClient();
 const comparisonService = new ProgressEvidenceComparisonService();
+const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-makkalsaantru-jwt-token-key-change-in-production-2026';
 
 // Default stage templates by project category
 export const defaultStageTemplates: Record<string, Array<{ name: string; description: string; sequence: number }>> = {
@@ -131,10 +133,19 @@ router.get('/projects/:projectId/stages', async (req, res) => {
  */
 router.get(
   '/assigned-projects',
-  authenticateToken,
-  requireRole(['CONTRACTOR', 'ADMIN', 'INSPECTOR']),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
+      // Optional JWT decoding for contractor context
+      const authHeader = req.headers['authorization'];
+      const token = authHeader && authHeader.split(' ')[1];
+      if (token) {
+        try {
+          const decoded = jwt.verify(token, JWT_SECRET) as AuthUserPayload;
+          req.user = decoded;
+        } catch {
+          // Token optional for public/demo reading
+        }
+      }
       let projects: any[] = [];
 
       try {

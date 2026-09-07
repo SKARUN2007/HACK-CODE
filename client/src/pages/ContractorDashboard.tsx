@@ -22,19 +22,49 @@ export const ContractorDashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [loginLoading, setLoginLoading] = useState<boolean>(false);
+
+  const handleDemoContractorLogin = async () => {
+    setLoginLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: 'contractor@makkalsaantru.gov.in',
+          password: 'contractor123',
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed demo contractor login');
+      
+      localStorage.setItem('makkalsaantru_token', data.token);
+      localStorage.setItem('makkalsaantru_user', JSON.stringify(data.user));
+      localStorage.setItem('ms_auth_token', data.token);
+
+      await fetchAssignedProjects();
+    } catch (err: any) {
+      setError(err.message || 'Demo contractor login failed.');
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
   const fetchAssignedProjects = async () => {
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem('ms_auth_token');
-      const res = await fetch('/api/contractor/assigned-projects', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const token = localStorage.getItem('makkalsaantru_token') || localStorage.getItem('ms_auth_token');
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const res = await fetch('/api/contractor/assigned-projects', { headers });
 
       if (!res.ok) {
-        throw new Error('Failed to fetch assigned projects');
+        throw new Error('Failed to fetch assigned projects. Please log in as an authorized contractor.');
       }
 
       const data = await res.json();
@@ -107,12 +137,21 @@ export const ContractorDashboard: React.FC = () => {
             </div>
           </div>
 
-          <button
-            onClick={fetchAssignedProjects}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium transition border border-slate-700"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh Portal
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleDemoContractorLogin}
+              disabled={loginLoading}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm transition shadow-lg shadow-amber-500/20"
+            >
+              <HardHat className="w-4 h-4" /> {loginLoading ? 'Logging In...' : 'Demo Login as Contractor'}
+            </button>
+            <button
+              onClick={fetchAssignedProjects}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium transition border border-slate-700"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
+            </button>
+          </div>
         </div>
 
         {/* Security Rule Notice */}
@@ -133,8 +172,15 @@ export const ContractorDashboard: React.FC = () => {
 
         {/* Error State */}
         {error && (
-          <div className="bg-red-950/40 border border-red-800 p-4 rounded-xl text-red-200 text-sm">
-            {error}
+          <div className="bg-red-950/40 border border-red-800 p-4 rounded-xl text-red-200 text-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <span>{error}</span>
+            <button
+              onClick={handleDemoContractorLogin}
+              disabled={loginLoading}
+              className="px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition shrink-0"
+            >
+              {loginLoading ? 'Logging In...' : '⚡ Quick Login as Demo Contractor'}
+            </button>
           </div>
         )}
 

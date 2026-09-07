@@ -1,0 +1,509 @@
+// Prisma Schema for MakkalSaantru Public-Work Verification Platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CITIZEN
+  INSPECTOR
+  ADMIN
+}
+
+enum ProjectStatus {
+  PLANNING
+  IN_PROGRESS
+  COMPLETED
+  SUSPENDED
+}
+
+enum MilestoneStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  REACHED
+  VERIFIED
+}
+
+enum EvidenceStatus {
+  SUBMITTED
+  PROCESSING
+  ANALYZED
+  NEEDS_REVIEW
+  VERIFIED
+}
+
+enum VerificationResult {
+  CONSISTENT
+  REVIEW
+  POTENTIAL_MISMATCH
+}
+
+enum HumanStatus {
+  PENDING
+  APPROVED
+  ACTION_TAKEN
+  DISMISSED
+}
+
+model User {
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  passwordHash String
+  role         Role          @default(CITIZEN)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  evidences    Evidence[]    @relation("CitizenEvidences")
+  inspections  Verification[] @relation("InspectorVerifications")
+  civicReports CivicReport[] @relation("CitizenCivicReports")
+  auditLogs    AuditLog[]
+
+  assignedRoutes InspectionRoute[] @relation("InspectorRoutes")
+  createdRoutes  InspectionRoute[] @relation("CreatedRoutes")
+
+  @@map("users")
+}
+
+model Project {
+  id               String        @id @default(uuid())
+  verificationCode String?       @unique // e.g. MS-ROAD-001
+  title            String
+  description      String
+  category         String
+  location         String
+  latitude         Float
+  longitude        Float
+  budget           Float
+  reportedProgress Float         @default(0.0)
+  status           ProjectStatus @default(IN_PROGRESS)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  milestones       Milestone[]
+  evidences        Evidence[]
+  verifications    Verification[]
+
+  @@map("projects")
+}
+
+model Milestone {
+  id          String          @id @default(uuid())
+  projectId   String
+  percentage  Float           // e.g. 25, 50, 75, 100
+  status      MilestoneStatus @default(NOT_STARTED)
+  reachedAt   DateTime?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  project     Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  evidences   Evidence[]
+
+  @@map("milestones")
+}
+
+model Evidence {
+  id                  String         @id @default(uuid())
+  projectId           String
+  citizenId           String
+  milestoneId         String?
+  photoUrl            String?
+  voiceUrl            String?
+  latitude            Float?
+  longitude           Float?
+  locationProvided    Boolean        @default(true)
+  distanceFromProject Float?         // Haversine distance in meters
+  locationStatus      String?        // NEAR_PROJECT, LOCATION_REVIEW, LOCATION_MISMATCH, LOCATION_NOT_PROVIDED
+  exactDuplicate      Boolean        @default(false)
+  duplicateOfId       String?        // Reference to matching evidence ID if duplicate
+  capturedAt          DateTime       @default(now())
+  evidenceHash        String         // SHA-256 integrity hash generated server-side
+  status              EvidenceStatus @default(SUBMITTED)
+  
+  // Non-accusatory field evidence answers
+  visibleWork         String?        // 'YES' | 'NO' | 'UNSURE'
+  milestoneMatch      String?        // 'YES' | 'NO' | 'UNSURE'
+  usableMaintained    String?        // 'YES' | 'NO' | 'UNSURE'
+  notes               String?        // Optional short comment
+
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  project             Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  citizen             User           @relation("CitizenEvidences", fields: [citizenId], references: [id])
+  milestone           Milestone?     @relation(fields: [milestoneId], references: [id])
+  verifications       Verification[]
+
+  @@map("evidences")
+}
+
+model Verification {
+  id              String             @id @default(uuid())
+  projectId       String
+  evidenceId      String
+  riskScore       Float              // 0.0 to 1.0
+  confidenceScore Float              // 0.0 to 1.0
+  result          VerificationResult // CONSISTENT, REVIEW, POTENTIAL_MISMATCH
+  explanation     String
+  humanStatus     HumanStatus        @default(PENDING)
+  inspectorId     String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  project         Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  evidence        Evidence           @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+  inspector       User?              @relation("InspectorVerifications", fields: [inspectorId], references: [id])
+
+  @@map("verifications")
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  userId       String?
+  action       String
+  entityType   String
+  entityId     String?
+  details      String?
+  previousHash String?
+  recordHash   String?
+  timestamp    DateTime @default(now())
+
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}
+
+enum PriorityLevel {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT_REVIEW
+}
+
+enum CivicReportStatus {
+  DRAFT
+  ANALYZING
+  CLASSIFIED
+  AUTHORITY_IDENTIFIED
+  READY_FOR_SUBMISSION
+  EXTERNALLY_SUBMITTED
+  REPORTED
+  UNDER_REVIEW
+  ACTION_IN_PROGRESS
+  AWAITING_AFTER_EVIDENCE
+  AWAITING_REVERIFICATION
+  RESOLVED
+  REOPENED
+  CLOSED
+}
+
+enum CivicCategory {
+  ROAD
+  SANITATION
+  WATER_SUPPLY
+  DRAINAGE
+  STREETLIGHT
+  PUBLIC_BUILDING
+  PUBLIC_SPACE
+  SEWAGE
+  OTHER
+}
+
+enum EvidenceStage {
+  ORIGINAL_BEFORE
+  ACTION_PROGRESS
+  AFTER
+  REVERIFICATION
+}
+
+model CivicReport {
+  id                        String            @id @default(uuid())
+  reportCode                String            @unique // e.g. MS-CIV-2026-00124
+  citizenId                 String
+  photoUrl                  String?
+  voiceUrl                  String?
+  description               String?
+  latitude                  Float?
+  longitude                 Float?
+  locationText              String?
+  category                  CivicCategory     @default(OTHER)
+  issueType                 String?           // e.g. POTHOLE, GARBAGE_ACCUMULATION
+  classificationConfidence  Float?            // 0.0 to 1.0
+  classificationExplanation String?
+  authorityId               String?
+  routingConfidence         Float?            // 0.0 to 1.0
+  complaintText             String?
+  evidenceHash              String?
+  status                    CivicReportStatus @default(DRAFT)
+
+  // URGENCY / PRIORITY ENGINE FIELDS
+  priorityScore             Float             @default(0.0) // 0 - 100
+  priorityLevel             PriorityLevel     @default(LOW)
+  priorityReasons           String?           // JSON array or bullet list string explaining score
+  priorityCalculatedAt      DateTime?
+  priorityVersion           String?           @default("1.0")
+  priorityManualOverride    Boolean           @default(false)
+  priorityOverrideReason    String?
+  priorityOverrideBy        String?
+  independentReportCount    Int               @default(1)
+  confirmationCount         Int               @default(0)
+  evidenceConfidence        Float             @default(0.85) // Separate 0-100 evidence quality score
+
+  // BEFORE -> AFTER RESOLUTION PROOF FIELDS
+  actionStartedAt           DateTime?
+  actionType                String?           // e.g. BITUMEN_PATCHWORK, DRAIN_DESILTING, CONTAINER_CLEARED
+  actionDescription         String?
+  assignedInspector         String?
+  expectedCompletionDate    DateTime?
+  isDemoAction              Boolean           @default(false)
+  
+  afterPhotoUrl             String?
+  afterVoiceUrl             String?
+  afterLocationText         String?
+  afterLatitude             Float?
+  afterLongitude            Float?
+  afterCapturedAt           DateTime?
+  afterEvidenceHash         String?           // SHA-256 integrity hash for after photo
+  afterActionNote           String?
+  afterUploadedBy           String?
+
+  aiComparisonResult        String?           // POSSIBLY_RESOLVED, POSSIBLY_UNRESOLVED, UNCERTAIN
+  aiComparisonConfidence    Float?
+  aiComparisonObservations  String?           // JSON array of observation notes
+
+  humanReverificationStatus String?           // RESOLUTION_CONFIRMED, ISSUE_STILL_PRESENT, MORE_EVIDENCE_REQUIRED
+  humanReverificationNote   String?
+  humanReverifiedBy         String?
+  humanReverifiedAt         DateTime?
+
+  citizenReverificationStatus String?         // APPEARS_RESOLVED, STILL_PRESENT, UNSURE
+  citizenReverificationComment String?
+  citizenReverifiedAt       DateTime?
+
+  resolvedConfirmations     Int               @default(0)
+  stillPresentConfirmations Int               @default(0)
+  unsureConfirmations       Int               @default(0)
+
+  reopenReason              String?
+  reopenedAt                DateTime?
+  resolvedAt                DateTime?
+
+  createdAt                 DateTime          @default(now())
+  updatedAt                 DateTime          @updatedAt
+
+  citizen                   User              @relation("CitizenCivicReports", fields: [citizenId], references: [id])
+  authority                 AuthorityDirectory? @relation(fields: [authorityId], references: [id])
+  evidenceItems             CivicEvidenceItem[]
+  routeStops                InspectionRouteStop[]
+  domainAssignments         CaseDomainAssignment[]
+  domainTasks               CaseDomainTask[]
+
+  @@index([latitude, longitude])
+  @@index([category, status, priorityLevel])
+  @@index([createdAt])
+  @@map("civic_reports")
+}
+
+enum DomainAssignmentRole {
+  PRIMARY
+  RELATED
+}
+
+enum DomainAssignmentStatus {
+  SUGGESTED
+  CONFIRMED
+  REJECTED
+}
+
+enum DomainTaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+}
+
+model DomainRelationship {
+  id                String        @id @default(uuid())
+  primaryDomain     CivicCategory
+  relatedDomain     CivicCategory
+  relationshipType  String        @default("POSSIBLE_IMPACT") // POSSIBLE_IMPACT, CO_OCCURRENCE, SECONDARY_DAMAGE
+  description       String
+  enabled           Boolean       @default(true)
+  minimumConfidence Float?        @default(0.60)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@unique([primaryDomain, relatedDomain])
+  @@map("domain_relationships")
+}
+
+model CaseDomainAssignment {
+  id               String                 @id @default(uuid())
+  reportId         String
+  domain           CivicCategory
+  relationshipRole DomainAssignmentRole   @default(PRIMARY)
+  confidence       Float                  @default(0.85)
+  reason           String
+  status           DomainAssignmentStatus @default(SUGGESTED)
+  confirmedBy      String?
+  confirmedAt      DateTime?
+  rejectionReason  String?
+  authorityId      String?                // Configured mapped authority ID for this domain
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  report           CivicReport            @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  tasks            CaseDomainTask[]
+
+  @@index([reportId])
+  @@map("case_domain_assignments")
+}
+
+model CaseDomainTask {
+  id                  String               @id @default(uuid())
+  reportId            String
+  domainAssignmentId  String?
+  domain              CivicCategory
+  title               String
+  action              String               // Action text e.g. "Drainage inspection and clearance"
+  status              DomainTaskStatus     @default(PENDING)
+  sequence            Int                  @default(1)
+  dependsOnTaskId     String?              // Dependency task ID e.g. Drainage task before Road task
+  assignedAuthorityId String?
+  assignedInspector   String?
+  beforeProofUrl      String?
+  afterProofUrl       String?
+  notes               String?
+  completedAt         DateTime?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  report              CivicReport          @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  domainAssignment    CaseDomainAssignment? @relation(fields: [domainAssignmentId], references: [id], onDelete: SetNull)
+
+  @@index([reportId])
+  @@map("case_domain_tasks")
+}
+
+
+model AuthorityDirectory {
+  id                  String   @id @default(uuid())
+  name                String
+  type                String   // MUNICIPAL_CORPORATION, PUBLIC_WORKS_DEPT, WATER_BOARD, ELECTRICITY_BOARD, PANCHAYAT
+  jurisdiction        String   // District / City / Ward
+  city                String?
+  state               String   @default("Tamil Nadu")
+  supportedCategories String   // Comma-separated list of CivicCategory values e.g. "ROAD,DRAINAGE"
+  submissionUrl       String?
+  contactMethod       String?  // Phone / Email / Portal
+  isDemo              Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  civicReports        CivicReport[]
+
+  @@map("authority_directories")
+}
+
+model PriorityRule {
+  id          String   @id @default(uuid())
+  name        String
+  signal      String   // INDEPENDENT_REPORTS, CONFIRMATIONS, REPORT_AGE, CATEGORY_PRIORITY, LOCATION_IMPORTANCE, EVIDENCE_COMPLETENESS
+  weight      Float    // Weight factor e.g. 25.0
+  enabled     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("priority_rules")
+}
+
+model CivicEvidenceItem {
+  id          String        @id @default(uuid())
+  reportId    String
+  stage       EvidenceStage @default(ORIGINAL_BEFORE)
+  photoUrl    String?
+  voiceUrl    String?
+  latitude    Float?
+  longitude   Float?
+  capturedAt  DateTime      @default(now())
+  receivedAt  DateTime      @default(now())
+  hash        String        // SHA-256 integrity hash
+  uploadedBy  String?
+  notes       String?
+  createdAt   DateTime      @default(now())
+
+  report      CivicReport   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@map("civic_evidence_items")
+}
+
+enum RouteStatus {
+  DRAFT
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum StopStatus {
+  PENDING
+  COMPLETED
+  SKIPPED
+}
+
+model InspectionRoute {
+  id                    String      @id @default(uuid())
+  routeCode             String      @unique // e.g. IR-2026-00124
+  name                  String
+  inspectorId           String?
+  createdBy             String
+  startLocationName     String?     @default("Authority Office")
+  startLat              Float
+  startLong             Float
+  status                RouteStatus @default(DRAFT)
+  totalCases            Int         @default(0)
+  completedCases        Int         @default(0)
+  skippedCases          Int         @default(0)
+  approxTotalDistanceKm Float       @default(0.0) // Geographic Haversine distance
+  algorithmVersion      String      @default("1.0 (Haversine + Nearest-Neighbor + 2-Opt)")
+  routeExplanation      String?
+  createdAt             DateTime    @default(now())
+  assignedAt            DateTime?
+  startedAt             DateTime?
+  completedAt           DateTime?
+  updatedAt             DateTime    @updatedAt
+
+  inspector             User?       @relation("InspectorRoutes", fields: [inspectorId], references: [id])
+  creator               User        @relation("CreatedRoutes", fields: [createdBy], references: [id])
+  stops                 InspectionRouteStop[]
+
+  @@index([status, inspectorId])
+  @@map("inspection_routes")
+}
+
+model InspectionRouteStop {
+  id                           String          @id @default(uuid())
+  routeId                      String
+  reportId                     String
+  sequence                     Int             // 1, 2, 3...
+  approxDistanceFromPreviousKm Float           @default(0.0)
+  status                       StopStatus      @default(PENDING)
+  completedAt                  DateTime?
+  skipReason                   String?         // ACCESS_ISSUE, INSUFFICIENT_TIME, LOCATION_ISSUE, OTHER
+  skipNotes                    String?
+  verificationNote             String?
+  verificationVerdict          String?         // INSPECTION_COMPLETED, NEEDS_ACTION, NO_ISSUE_FOUND, NEEDS_MORE_EVIDENCE
+
+  route                        InspectionRoute @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  report                       CivicReport     @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([routeId, sequence])
+  @@map("inspection_route_stops")
+}
+
+

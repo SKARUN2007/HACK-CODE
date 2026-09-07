@@ -4,7 +4,7 @@ import {
   Upload,
   Camera,
   MapPin,
-  CheckCircle,
+  CheckCircle2,
   AlertTriangle,
   ArrowLeft,
   ShieldCheck,
@@ -42,14 +42,12 @@ export const ContractorProgressUploadPage: React.FC = () => {
   useEffect(() => {
     const fetchProjectAndStages = async () => {
       try {
-        // Fetch project info
         const projRes = await fetch(`/api/projects/${projectId}`);
         if (projRes.ok) {
           const data = await projRes.json();
           if (data.project) setProjectTitle(data.project.title);
         }
 
-        // Fetch stages
         const stageRes = await fetch(`/api/contractor/projects/${projectId}/stages`);
         if (stageRes.ok) {
           const data = await stageRes.json();
@@ -112,33 +110,34 @@ export const ContractorProgressUploadPage: React.FC = () => {
     setError(null);
 
     try {
-      const token = localStorage.getItem('ms_auth_token');
+      const token = localStorage.getItem('makkalsaantru_token') || localStorage.getItem('ms_auth_token');
       const formData = new FormData();
       formData.append('projectId', projectId || '');
       formData.append('projectStageId', selectedStageId);
       formData.append('title', title);
       formData.append('description', description);
       formData.append('claim', claim);
-      if (latitude !== null) formData.append('latitude', String(latitude));
-      if (longitude !== null) formData.append('longitude', String(longitude));
-      formData.append('photo', photoFile);
+      if (latitude !== null) formData.append('latitude', latitude.toString());
+      if (longitude !== null) formData.append('longitude', longitude.toString());
+      formData.append('photos', photoFile);
+
+      const headers: Record<string, string> = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
 
       const res = await fetch('/api/contractor/submissions', {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers,
         body: formData,
       });
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to submit contractor progress evidence');
+        throw new Error(data.error || 'Failed to upload contractor progress evidence.');
       }
 
       setSuccessData(data);
     } catch (err: any) {
-      setError(err.message || 'Error submitting contractor evidence.');
+      setError(err.message || 'Error submitting contractor progress evidence.');
     } finally {
       setSubmitting(false);
     }
@@ -146,147 +145,281 @@ export const ContractorProgressUploadPage: React.FC = () => {
 
   if (successData) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 flex items-center justify-center">
-        <div className="max-w-xl w-full bg-slate-900 border border-slate-800 p-8 rounded-2xl space-y-6 text-center shadow-2xl">
-          <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mx-auto">
-            <CheckCircle className="w-10 h-10" />
+      <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', padding: '3rem 1rem' }}>
+        <div
+          style={{
+            maxWidth: '600px',
+            margin: '0 auto',
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 10px 30px rgba(0, 43, 73, 0.12)',
+            padding: '2.5rem',
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1.25rem',
+          }}
+        >
+          <div
+            style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              backgroundColor: '#f0fdf4',
+              border: '2px solid #bbf7d0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#16a34a',
+              margin: '0 auto',
+            }}
+          >
+            <CheckCircle2 size={36} />
           </div>
 
-          <h2 className="text-2xl font-bold text-white">Progress Evidence Submitted</h2>
-          <p className="text-sm text-slate-300">
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+            Progress Evidence Submitted
+          </h2>
+          <p style={{ fontSize: '0.9rem', color: '#64748b', margin: 0 }}>
             Your progress evidence has been registered on the server with a cryptographic SHA-256 integrity hash.
           </p>
 
-          <div className="bg-slate-950 p-4 rounded-xl text-left space-y-2 border border-slate-800 text-xs font-mono">
-            <div className="flex justify-between text-slate-400">
+          <div
+            style={{
+              backgroundColor: '#02182b',
+              padding: '1rem',
+              borderRadius: '10px',
+              textAlign: 'left',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+              fontSize: '0.8rem',
+              fontFamily: 'monospace',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
               <span>Status:</span>
-              <span className="text-amber-400 font-bold">AWAITING_VERIFICATION</span>
+              <span style={{ color: '#fbbf24', fontWeight: 700 }}>AWAITING_VERIFICATION</span>
             </div>
-            <div className="flex justify-between text-slate-400">
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
               <span>SHA-256 Fingerprint:</span>
-              <span className="text-emerald-400">{successData.submission?.fingerprint}</span>
+              <span style={{ color: '#34d399', wordBreak: 'break-all' }}>{successData.submission?.fingerprint}</span>
             </div>
-            <div className="flex justify-between text-slate-400">
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
               <span>Submitted At:</span>
-              <span className="text-slate-300">{new Date().toLocaleString()}</span>
+              <span style={{ color: '#e2e8f0' }}>{new Date().toLocaleString()}</span>
             </div>
           </div>
 
-          <div className="p-3 bg-blue-950/40 border border-blue-800/50 rounded-xl text-xs text-blue-300 text-left">
-            💡 Next Step: Nearby citizens and authorized field inspectors can now verify your submitted evidence on ground.
+          <div
+            style={{
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              borderRadius: '10px',
+              padding: '12px 14px',
+              fontSize: '0.825rem',
+              color: '#1e3a8a',
+              textAlign: 'left',
+            }}
+          >
+            💡 <strong>Next Step:</strong> Nearby citizens and authorized field inspectors can now verify your submitted evidence on ground.
           </div>
 
-          <div className="flex gap-4 pt-4">
-            <Link
-              to="/contractor"
-              className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-sm transition"
-            >
-              Return to Contractor Dashboard
-            </Link>
-          </div>
+          <Link
+            to="/contractor"
+            style={{
+              width: '100%',
+              padding: '12px 20px',
+              backgroundColor: '#f59e0b',
+              color: '#02182b',
+              fontWeight: 700,
+              borderRadius: '10px',
+              fontSize: '0.9rem',
+              textDecoration: 'none',
+              marginTop: '8px',
+              display: 'inline-block',
+            }}
+          >
+            Return to Contractor Dashboard
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8">
-      <div className="max-w-3xl mx-auto space-y-6">
-        {/* Top Nav */}
+    <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', padding: '2rem 0' }}>
+      <div className="container" style={{ maxWidth: '800px', margin: '0 auto', padding: '0 1rem' }}>
+        
+        {/* Back Link */}
         <Link
           to="/contractor"
-          className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-slate-200 transition"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '0.875rem',
+            color: '#64748b',
+            textDecoration: 'none',
+            marginBottom: '1rem',
+            fontWeight: 600,
+          }}
         >
-          <ArrowLeft className="w-4 h-4" /> Back to Contractor Workspace
+          <ArrowLeft size={16} /> Back to Contractor Workspace
         </Link>
 
-        {/* Header */}
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-2">
-          <div className="flex items-center gap-2 text-xs text-amber-400 font-semibold uppercase tracking-wider">
-            <HardHat className="w-4 h-4" /> Contractor Evidence Upload
+        {/* Header Box */}
+        <div
+          style={{
+            backgroundColor: '#002B49',
+            borderRadius: '16px',
+            padding: '1.75rem',
+            color: '#ffffff',
+            marginBottom: '1.5rem',
+            boxShadow: '0 8px 24px rgba(0,43,73,0.15)',
+          }}
+        >
+          <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fbbf24', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+            <HardHat size={16} /> Contractor Progress Upload Form
           </div>
-          <h1 className="text-2xl font-bold text-white">{projectTitle}</h1>
-          <p className="text-xs text-slate-400">
-            Submit photographic ground evidence for completed work stages. Evidence is evaluated by the community and field inspectors.
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '4px 0 6px', color: '#ffffff' }}>
+            {projectTitle}
+          </h1>
+          <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: 0 }}>
+            Submit photographic ground evidence for completed work stages. Evidence is evaluated by citizens, AI visual comparison, and field inspectors.
           </p>
         </div>
 
         {error && (
-          <div className="bg-red-950/50 border border-red-800 p-4 rounded-xl text-red-200 text-sm flex items-center gap-3">
-            <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
+          <div
+            style={{
+              backgroundColor: '#fef2f2',
+              border: '1px solid #fecaca',
+              color: '#991b1b',
+              borderRadius: '12px',
+              padding: '1rem',
+              marginBottom: '1.5rem',
+              fontSize: '0.875rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+            }}
+          >
+            <AlertTriangle size={20} style={{ color: '#dc2626', flexShrink: 0 }} />
             <span>{error}</span>
           </div>
         )}
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-6">
-          {/* Work Stage Selector */}
-          <div className="space-y-2">
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-              1. Select Completed Work Stage *
+        {/* Form Container */}
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            border: '1px solid #e2e8f0',
+            boxShadow: '0 4px 20px rgba(0, 43, 73, 0.08)',
+            padding: '2rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1.5rem',
+          }}
+        >
+          {/* Select Work Stage */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a' }}>
+              Select Work Stage *
             </label>
             <select
               value={selectedStageId}
               onChange={(e) => setSelectedStageId(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500"
-              required
+              style={{
+                width: '100%',
+                padding: '10px 14px',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                fontSize: '0.9rem',
+                backgroundColor: '#ffffff',
+                color: '#0f172a',
+              }}
             >
               {stages.map((st) => (
                 <option key={st.id} value={st.id}>
-                  Stage {st.sequence}: {st.name}
+                  Stage {st.sequence}: {st.name} ({st.description})
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Progress Title */}
-          <div className="space-y-2">
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-              2. Progress Update Title *
+          {/* Title */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a' }}>
+              Progress Update Title *
             </label>
             <input
               type="text"
-              placeholder="e.g. Road base layer completed for approximately 500 metres"
+              placeholder="e.g. Bituminous Asphalt Layer Laying - Km 2.4 to 3.8"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500"
-              required
+              style={{
+                width: '100%',
+                padding: '10px 14px',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                fontSize: '0.9rem',
+                color: '#0f172a',
+              }}
             />
           </div>
 
-          {/* Work Claim */}
-          <div className="space-y-2">
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-              3. Specific Contractor Claim *
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. Crushed stone base layer laid, compacted, and ready for asphalt surfacing."
-              value={claim}
-              onChange={(e) => setClaim(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500"
-              required
-            />
-          </div>
-
-          {/* Detailed Description */}
-          <div className="space-y-2">
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-              4. Additional Technical Details (Optional)
+          {/* Specific Work Claim */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a' }}>
+              Specific Work Claim *
             </label>
             <textarea
               rows={3}
-              placeholder="Provide quantity measurements, material specs, or field notes..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-amber-500"
+              placeholder="Describe exact physical work completed on ground (e.g. Laid 50mm thick bituminous concrete layer over compacted crushed aggregate base)."
+              value={claim}
+              onChange={(e) => setClaim(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px 14px',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                fontSize: '0.9rem',
+                color: '#0f172a',
+                fontFamily: 'inherit',
+              }}
             />
           </div>
 
-          {/* Photo Evidence Upload */}
-          <div className="space-y-2">
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-              5. Progress Evidence Photo *
+          {/* Additional Remarks */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#475569' }}>
+              Additional Inspection Notes / Equipment Details (Optional)
+            </label>
+            <textarea
+              rows={2}
+              placeholder="Machinery utilized, batch mix plant delivery details, site engineer remarks..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px 14px',
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                fontSize: '0.9rem',
+                color: '#0f172a',
+                fontFamily: 'inherit',
+              }}
+            />
+          </div>
+
+          {/* Photo Evidence Upload Box */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0f172a' }}>
+              Ground Progress Photo Evidence *
             </label>
 
             <input
@@ -294,71 +427,113 @@ export const ContractorProgressUploadPage: React.FC = () => {
               accept="image/*"
               ref={fileInputRef}
               onChange={handleFileChange}
-              className="hidden"
+              style={{ display: 'none' }}
             />
 
-            {photoPreview ? (
-              <div className="relative rounded-xl overflow-hidden border border-slate-700 bg-slate-950 p-2 flex flex-col items-center">
-                <img src={photoPreview} alt="Evidence Preview" className="max-h-64 object-contain rounded-lg" />
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="mt-3 text-xs text-amber-400 font-semibold hover:underline"
-                >
-                  Change Photo
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full border-2 border-dashed border-slate-700 hover:border-amber-500/60 p-8 rounded-xl bg-slate-950/50 flex flex-col items-center justify-center gap-3 transition"
-              >
-                <Camera className="w-8 h-8 text-amber-400" />
-                <span className="text-sm font-semibold text-slate-200">Take Photo or Upload Ground Evidence</span>
-                <span className="text-xs text-slate-500">Supports JPEG, PNG, WEBP up to 15MB. Verified with binary magic-byte scanner.</span>
-              </button>
-            )}
-          </div>
-
-          {/* Location Capture */}
-          <div className="space-y-2">
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-              6. On-Site GPS Location (Optional Signal)
-            </label>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={handleCaptureLocation}
-                disabled={locating}
-                className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center gap-2 border border-slate-700"
-              >
-                <MapPin className={`w-4 h-4 text-amber-400 ${locating ? 'animate-bounce' : ''}`} />
-                {locating ? 'Capturing GPS...' : 'Capture Device GPS Location'}
-              </button>
-
-              {latitude !== null && longitude !== null && (
-                <span className="text-xs text-emerald-400 font-mono flex items-center gap-1">
-                  <CheckCircle className="w-3.5 h-3.5" /> GPS: {latitude.toFixed(4)}, {longitude.toFixed(4)}
-                </span>
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              style={{
+                border: '2px dashed #cbd5e1',
+                borderRadius: '12px',
+                padding: '1.75rem',
+                textAlign: 'center',
+                backgroundColor: '#f8fafc',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+            >
+              {photoPreview ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                  <img
+                    src={photoPreview}
+                    alt="Preview"
+                    style={{ maxHeight: '200px', borderRadius: '8px', border: '1px solid #cbd5e1', objectFit: 'cover' }}
+                  />
+                  <span style={{ fontSize: '0.8rem', color: '#16a34a', fontWeight: 700 }}>
+                    ✓ Image Attached ({photoFile?.name}). Click to change.
+                  </span>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                  <Camera size={36} style={{ color: '#d97706' }} />
+                  <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a' }}>
+                    Click to select progress photo
+                  </div>
+                  <div style={{ fontSize: '0.775rem', color: '#64748b' }}>
+                    High resolution JPEG/PNG containing timestamp & clear site view.
+                  </div>
+                </div>
               )}
             </div>
           </div>
 
-          {/* Security Notice */}
-          <div className="p-3 bg-amber-950/30 border border-amber-800/40 rounded-xl text-xs text-amber-300 flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 shrink-0 text-amber-400" />
-            <span>SHA-256 evidence integrity hash will be generated upon receipt to prove evidence non-tampering.</span>
+          {/* GPS Location Capture */}
+          <div
+            style={{
+              backgroundColor: '#f8fafc',
+              border: '1px solid #cbd5e1',
+              borderRadius: '10px',
+              padding: '1rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '10px',
+            }}
+          >
+            <div>
+              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <MapPin size={16} style={{ color: '#002B49' }} /> Geo-Tagging Coordinates
+              </div>
+              <div style={{ fontSize: '0.775rem', color: '#64748b', marginTop: '2px' }}>
+                {latitude !== null && longitude !== null
+                  ? `Lat: ${latitude.toFixed(4)}, Long: ${longitude.toFixed(4)}`
+                  : 'Capture device GPS location to verify ground distance.'}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleCaptureLocation}
+              disabled={locating}
+              style={{
+                padding: '8px 14px',
+                borderRadius: '6px',
+                backgroundColor: '#002B49',
+                color: '#ffffff',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              {locating ? 'Capturing GPS...' : latitude !== null ? '✓ GPS Captured' : 'Tag GPS Location'}
+            </button>
           </div>
 
           {/* Submit Button */}
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-base transition flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20"
+            style={{
+              width: '100%',
+              padding: '14px 20px',
+              borderRadius: '10px',
+              backgroundColor: '#f59e0b',
+              color: '#02182b',
+              fontWeight: 800,
+              fontSize: '1rem',
+              border: 'none',
+              boxShadow: '0 4px 14px rgba(245, 158, 11, 0.35)',
+              cursor: 'pointer',
+              marginTop: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+            }}
           >
-            <Upload className={`w-5 h-5 ${submitting ? 'animate-spin' : ''}`} />
-            {submitting ? 'Submitting Evidence...' : 'SUBMIT EVIDENCE FOR VERIFICATION'}
+            <Upload size={20} /> {submitting ? 'Cryptographically Signing & Uploading...' : 'SUBMIT STAGE PROGRESS EVIDENCE'}
           </button>
         </form>
       </div>

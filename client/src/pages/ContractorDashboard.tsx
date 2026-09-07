@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   HardHat,
   Upload,
-  CheckCircle,
+  CheckCircle2,
   Clock,
   AlertTriangle,
   FileText,
@@ -13,6 +13,9 @@ import {
   ChevronRight,
   RefreshCw,
   Building,
+  UserCheck,
+  ArrowRight,
+  Info,
 } from 'lucide-react';
 import { Project, ContractorProgressSubmission } from '../types';
 
@@ -21,8 +24,21 @@ export const ContractorDashboard: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
   const [loginLoading, setLoginLoading] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<any | null>(null);
+
+  const checkUserStatus = () => {
+    const userStr = localStorage.getItem('makkalsaantru_user');
+    if (userStr) {
+      try {
+        setCurrentUser(JSON.parse(userStr));
+      } catch (e) {
+        setCurrentUser(null);
+      }
+    } else {
+      setCurrentUser(null);
+    }
+  };
 
   const handleDemoContractorLogin = async () => {
     setLoginLoading(true);
@@ -38,11 +54,12 @@ export const ContractorDashboard: React.FC = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed demo contractor login');
-      
+
       localStorage.setItem('makkalsaantru_token', data.token);
       localStorage.setItem('makkalsaantru_user', JSON.stringify(data.user));
       localStorage.setItem('ms_auth_token', data.token);
 
+      setCurrentUser(data.user);
       await fetchAssignedProjects();
     } catch (err: any) {
       setError(err.message || 'Demo contractor login failed.');
@@ -77,6 +94,7 @@ export const ContractorDashboard: React.FC = () => {
   };
 
   useEffect(() => {
+    checkUserStatus();
     fetchAssignedProjects();
   }, []);
 
@@ -84,109 +102,309 @@ export const ContractorDashboard: React.FC = () => {
     switch (status) {
       case 'VERIFIED':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-            <CheckCircle className="w-3.5 h-3.5" /> VERIFIED BY HUMAN AUTHORITY
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 12px',
+              borderRadius: '9999px',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              backgroundColor: '#f0fdf4',
+              color: '#16a34a',
+              border: '1px solid #bbf7d0',
+            }}
+          >
+            <CheckCircle2 size={14} /> VERIFIED BY HUMAN AUTHORITY
           </span>
         );
       case 'MORE_EVIDENCE_REQUIRED':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30">
-            <AlertTriangle className="w-3.5 h-3.5" /> MORE EVIDENCE REQUESTED
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 12px',
+              borderRadius: '9999px',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              backgroundColor: '#fffbeb',
+              color: '#d97706',
+              border: '1px solid #fde68a',
+            }}
+          >
+            <AlertTriangle size={14} /> MORE EVIDENCE REQUESTED
           </span>
         );
       case 'FIELD_INSPECTION_REQUIRED':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-400 border border-sky-500/30">
-            <Clock className="w-3.5 h-3.5" /> FIELD INSPECTION SCHEDULED
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 12px',
+              borderRadius: '9999px',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              backgroundColor: '#f0f9ff',
+              color: '#0284c7',
+              border: '1px solid #bae6fd',
+            }}
+          >
+            <Clock size={14} /> FIELD INSPECTION SCHEDULED
           </span>
         );
       case 'NOT_CONFIRMED':
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/30">
-            <AlertTriangle className="w-3.5 h-3.5" /> PROGRESS NOT CONFIRMED
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 12px',
+              borderRadius: '9999px',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              backgroundColor: '#fef2f2',
+              color: '#dc2626',
+              border: '1px solid #fecaca',
+            }}
+          >
+            <AlertTriangle size={14} /> PROGRESS NOT CONFIRMED
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/30">
-            <Clock className="w-3.5 h-3.5" /> AWAITING PUBLIC / HUMAN REVIEW
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 12px',
+              borderRadius: '9999px',
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              backgroundColor: '#eff6ff',
+              color: '#2563eb',
+              border: '1px solid #bfdbfe',
+            }}
+          >
+            <Clock size={14} /> AWAITING PUBLIC / HUMAN REVIEW
           </span>
         );
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/80 border border-slate-800 p-6 rounded-2xl backdrop-blur-md">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
-              <HardHat className="w-8 h-8" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30">
-                  OFFICIAL CONTRACTOR WORKSPACE
-                </span>
+    <div style={{ backgroundColor: '#f8fafc', minHeight: '100vh', padding: '2rem 0' }}>
+      <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1rem' }}>
+        
+        {/* Header Section */}
+        <div
+          style={{
+            backgroundColor: '#002B49',
+            borderRadius: '16px',
+            padding: '2rem',
+            color: '#ffffff',
+            marginBottom: '2rem',
+            boxShadow: '0 10px 30px rgba(0, 43, 73, 0.2)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1.5rem',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+              <div
+                style={{
+                  width: '60px',
+                  height: '60px',
+                  borderRadius: '14px',
+                  backgroundColor: 'rgba(245, 158, 11, 0.15)',
+                  border: '1.5px solid #f59e0b',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#f59e0b',
+                  flexShrink: 0,
+                }}
+              >
+                <HardHat size={32} />
               </div>
-              <h1 className="text-2xl font-bold text-white mt-1">Contractor Execution Portal</h1>
-              <p className="text-sm text-slate-400">
-                Upload real-time ground evidence for assigned public works. Evidence is evaluated by citizens, AI, and field inspectors.
-              </p>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <span
+                    style={{
+                      backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                      color: '#fbbf24',
+                      border: '1px solid rgba(245, 158, 11, 0.4)',
+                      padding: '2px 10px',
+                      borderRadius: '4px',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      letterSpacing: '0.5px',
+                    }}
+                  >
+                    TAMIL NADU e-GOVERNANCE • CONTRACTOR PORTAL
+                  </span>
+                </div>
+                <h1 style={{ fontSize: '1.75rem', fontWeight: 800, margin: '4px 0 6px', color: '#ffffff' }}>
+                  Contractor Execution Portal
+                </h1>
+                <p style={{ fontSize: '0.9rem', color: '#94a3b8', margin: 0, maxWidth: '650px' }}>
+                  Upload real-time ground evidence for assigned public works. Evidence is evaluated transparently by citizens, AI, and field inspectors.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <button
+                onClick={handleDemoContractorLogin}
+                disabled={loginLoading}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '10px 18px',
+                  borderRadius: '10px',
+                  backgroundColor: '#f59e0b',
+                  color: '#02182b',
+                  fontWeight: 700,
+                  fontSize: '0.875rem',
+                  border: 'none',
+                  boxShadow: '0 4px 14px rgba(245, 158, 11, 0.35)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+              >
+                <HardHat size={18} /> {loginLoading ? 'Logging In...' : 'Demo Login as Contractor'}
+              </button>
+
+              <button
+                onClick={fetchAssignedProjects}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '10px 16px',
+                  borderRadius: '10px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  color: '#e2e8f0',
+                  fontWeight: 600,
+                  fontSize: '0.875rem',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  cursor: 'pointer',
+                }}
+              >
+                <RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Refresh
+              </button>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleDemoContractorLogin}
-              disabled={loginLoading}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm transition shadow-lg shadow-amber-500/20"
+          {currentUser && (
+            <div
+              style={{
+                backgroundColor: 'rgba(15, 23, 42, 0.6)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                padding: '10px 16px',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                fontSize: '0.825rem',
+                color: '#cbd5e1',
+              }}
             >
-              <HardHat className="w-4 h-4" /> {loginLoading ? 'Logging In...' : 'Demo Login as Contractor'}
-            </button>
-            <button
-              onClick={fetchAssignedProjects}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium transition border border-slate-700"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh
-            </button>
-          </div>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <UserCheck size={16} style={{ color: '#10b981' }} /> Active Session:{' '}
+                <strong style={{ color: '#ffffff' }}>{currentUser.name}</strong> ({currentUser.email})
+              </span>
+              <span
+                style={{
+                  backgroundColor: '#10b981',
+                  color: '#ffffff',
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                }}
+              >
+                {currentUser.role}
+              </span>
+            </div>
+          )}
         </div>
 
-        {/* Security Rule Notice */}
-        <div className="bg-blue-950/40 border border-blue-800/50 p-4 rounded-xl flex items-start gap-3 text-sm text-blue-200">
-          <ShieldCheck className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
-          <div>
-            <span className="font-semibold text-blue-300">Evidence Transparency Rule:</span> Submitted contractor evidence cannot be overwritten or self-verified. If additional documentation is requested by an inspector, submit a new version to preserve full audit history.
+        {/* Security Rule Notice Banner */}
+        <div
+          style={{
+            backgroundColor: '#eff6ff',
+            border: '1px solid #bfdbfe',
+            borderRadius: '12px',
+            padding: '1rem 1.25rem',
+            marginBottom: '2rem',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '12px',
+          }}
+        >
+          <ShieldCheck size={22} style={{ color: '#2563eb', flexShrink: 0, marginTop: '2px' }} />
+          <div style={{ fontSize: '0.875rem', color: '#1e3a8a', lineHeight: 1.5 }}>
+            <strong>Evidence Transparency Rule:</strong> Submitted contractor evidence cannot be overwritten or self-verified. If additional documentation is requested by an inspector, submit a new version to preserve full audit history.
           </div>
         </div>
 
         {/* Loading State */}
         {loading && (
-          <div className="flex flex-col items-center justify-center py-16 space-y-4">
-            <RefreshCw className="w-8 h-8 text-amber-400 animate-spin" />
-            <p className="text-sm text-slate-400">Loading assigned public work projects...</p>
+          <div style={{ textAlign: 'center', padding: '4rem 0' }}>
+            <RefreshCw size={36} style={{ color: '#f59e0b', margin: '0 auto 1rem' }} className="animate-spin" />
+            <p style={{ color: '#64748b', fontSize: '0.95rem' }}>Loading assigned public work projects...</p>
           </div>
         )}
 
-        {/* Error State */}
+        {/* Error Banner */}
         {error && (
-          <div className="bg-red-950/40 border border-red-800 p-4 rounded-xl text-red-200 text-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <span>{error}</span>
+          <div
+            style={{
+              backgroundColor: '#fef2f2',
+              border: '1px solid #fecaca',
+              color: '#991b1b',
+              borderRadius: '12px',
+              padding: '1rem 1.25rem',
+              marginBottom: '2rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '1rem',
+            }}
+          >
+            <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>{error}</span>
             <button
               onClick={handleDemoContractorLogin}
               disabled={loginLoading}
-              className="px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition shrink-0"
+              style={{
+                backgroundColor: '#f59e0b',
+                color: '#02182b',
+                padding: '6px 14px',
+                borderRadius: '6px',
+                fontSize: '0.775rem',
+                fontWeight: 700,
+                border: 'none',
+                cursor: 'pointer',
+              }}
             >
               {loginLoading ? 'Logging In...' : '⚡ Quick Login as Demo Contractor'}
             </button>
           </div>
         )}
 
-        {/* Projects Grid */}
+        {/* Projects Cards List */}
         {!loading && projects.length > 0 && (
-          <div className="grid grid-cols-1 gap-6">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             {projects.map((proj) => {
               const latestSubmission: ContractorProgressSubmission | undefined =
                 proj.contractorSubmissions && proj.contractorSubmissions.length > 0
@@ -196,104 +414,242 @@ export const ContractorDashboard: React.FC = () => {
               return (
                 <div
                   key={proj.id}
-                  className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 hover:border-slate-700 transition space-y-6"
+                  style={{
+                    backgroundColor: '#ffffff',
+                    borderRadius: '16px',
+                    border: '1px solid #e2e8f0',
+                    boxShadow: '0 4px 20px rgba(0, 43, 73, 0.08)',
+                    padding: '1.75rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '1.5rem',
+                  }}
                 >
-                  {/* Top Bar */}
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+                  {/* Top Bar Header */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                      flexWrap: 'wrap',
+                      gap: '1rem',
+                      paddingBottom: '1.25rem',
+                      borderBottom: '1px solid #f1f5f9',
+                    }}
+                  >
                     <div>
-                      <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                        <span
+                          style={{
+                            backgroundColor: '#f0fdf4',
+                            color: '#16a34a',
+                            border: '1px solid #bbf7d0',
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                          }}
+                        >
                           {proj.verificationCode || 'MS-PROJECT'}
                         </span>
-                        <span className="text-xs text-slate-400 uppercase tracking-wider">{proj.category}</span>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>
+                          {proj.category}
+                        </span>
                       </div>
-                      <h2 className="text-xl font-bold text-white mt-1">{proj.title}</h2>
-                      <p className="text-xs text-slate-400 flex items-center gap-1.5 mt-1">
-                        <MapPin className="w-3.5 h-3.5 text-slate-500" /> {proj.location}
+                      <h2 style={{ fontSize: '1.35rem', fontWeight: 700, color: '#0f172a', margin: '0 0 6px' }}>
+                        {proj.title}
+                      </h2>
+                      <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <MapPin size={14} style={{ color: '#002B49' }} /> {proj.location}
                       </p>
                     </div>
 
                     <Link
                       to={`/contractor/projects/${proj.id}/progress/new`}
-                      className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm transition shadow-lg shadow-amber-500/20 shrink-0"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '12px 20px',
+                        borderRadius: '10px',
+                        backgroundColor: '#f59e0b',
+                        color: '#02182b',
+                        fontWeight: 700,
+                        fontSize: '0.875rem',
+                        boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
+                        textDecoration: 'none',
+                        transition: 'transform 0.2s',
+                      }}
                     >
-                      <Upload className="w-4 h-4" /> UPLOAD PROGRESS EVIDENCE
+                      <Upload size={18} /> UPLOAD PROGRESS EVIDENCE
                     </Link>
                   </div>
 
-                  {/* Stages & Progress Overview */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Project Stages Column */}
-                    <div className="space-y-3">
-                      <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-amber-400" /> Configured Work Stages
+                  {/* Body Grid: Configured Stages vs Latest Evidence */}
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                      gap: '1.75rem',
+                    }}
+                  >
+                    {/* Column 1: Configured Work Stages */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
+                        <FileText size={16} style={{ color: '#d97706' }} /> Configured Work Stages
                       </h3>
-                      <div className="space-y-2">
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         {proj.stages && proj.stages.length > 0 ? (
                           proj.stages.map((st) => (
                             <div
                               key={st.id}
-                              className="flex items-center justify-between bg-slate-950/60 border border-slate-800/80 p-3 rounded-xl text-sm"
+                              style={{
+                                backgroundColor: '#f8fafc',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '10px',
+                                padding: '10px 14px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                              }}
                             >
-                              <div className="flex items-center gap-3">
-                                <span className="w-6 h-6 rounded-full bg-slate-800 text-amber-400 text-xs font-bold flex items-center justify-center border border-slate-700">
-                                  {st.sequence}
-                                </span>
-                                <div>
-                                  <div className="font-semibold text-slate-200">{st.name}</div>
-                                  {st.description && <div className="text-xs text-slate-500">{st.description}</div>}
-                                </div>
+                              <div
+                                style={{
+                                  width: '28px',
+                                  height: '28px',
+                                  borderRadius: '50%',
+                                  backgroundColor: '#002B49',
+                                  color: '#fbbf24',
+                                  fontWeight: 700,
+                                  fontSize: '0.8rem',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  flexShrink: 0,
+                                }}
+                              >
+                                {st.sequence}
+                              </div>
+                              <div>
+                                <div style={{ fontWeight: 600, fontSize: '0.875rem', color: '#0f172a' }}>{st.name}</div>
+                                {st.description && (
+                                  <div style={{ fontSize: '0.775rem', color: '#64748b', marginTop: '2px' }}>
+                                    {st.description}
+                                  </div>
+                                )}
                               </div>
                             </div>
                           ))
                         ) : (
-                          <div className="text-xs text-slate-500 italic">No stages configured.</div>
+                          <div style={{ fontSize: '0.85rem', color: '#94a3b8', fontStyle: 'italic', padding: '1rem 0' }}>
+                            No stages configured.
+                          </div>
                         )}
                       </div>
                     </div>
 
-                    {/* Latest Submission Column */}
-                    <div className="space-y-3">
-                      <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-sky-400" /> Latest Submitted Evidence
+                    {/* Column 2: Latest Submitted Evidence */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <h3 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
+                        <Clock size={16} style={{ color: '#0284c7' }} /> Latest Submitted Evidence
                       </h3>
 
                       {latestSubmission ? (
-                        <div className="bg-slate-950/80 border border-slate-800 p-4 rounded-xl space-y-3">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-slate-400 flex items-center gap-1">
-                              <Calendar className="w-3.5 h-3.5 text-slate-500" /> Version {latestSubmission.version} • {new Date(latestSubmission.submittedAt).toLocaleDateString()}
+                        <div
+                          style={{
+                            backgroundColor: '#f8fafc',
+                            border: '1px solid #cbd5e1',
+                            borderRadius: '12px',
+                            padding: '1.25rem',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '12px',
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '0.775rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <Calendar size={14} /> Version {latestSubmission.version} • {new Date(latestSubmission.submittedAt).toLocaleDateString()}
                             </span>
                             {getStatusBadge(latestSubmission.status)}
                           </div>
 
-                          <div className="font-semibold text-slate-200 text-sm">{latestSubmission.title}</div>
-                          <p className="text-xs text-slate-400 bg-slate-900/60 p-2.5 rounded-lg italic border border-slate-800">
+                          <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>
+                            {latestSubmission.title}
+                          </div>
+
+                          <div
+                            style={{
+                              backgroundColor: '#ffffff',
+                              border: '1px solid #e2e8f0',
+                              padding: '10px 12px',
+                              borderRadius: '8px',
+                              fontSize: '0.825rem',
+                              color: '#334155',
+                              fontStyle: 'italic',
+                            }}
+                          >
                             "{latestSubmission.claim}"
-                          </p>
+                          </div>
 
                           {latestSubmission.evidences && latestSubmission.evidences.length > 0 && (
-                            <div className="flex items-center gap-3 pt-2">
-                              <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-slate-700 bg-slate-900 shrink-0">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingTop: '4px' }}>
+                              <div
+                                style={{
+                                  width: '64px',
+                                  height: '64px',
+                                  borderRadius: '8px',
+                                  overflow: 'hidden',
+                                  border: '1px solid #cbd5e1',
+                                  backgroundColor: '#e2e8f0',
+                                  flexShrink: 0,
+                                }}
+                              >
                                 <img
                                   src={latestSubmission.evidences[0].fileUrl}
                                   alt="Contractor Evidence"
-                                  className="w-full h-full object-cover"
+                                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
                               </div>
-                              <div className="text-xs space-y-1 text-slate-400">
-                                <div className="font-mono text-emerald-400">SHA-256 Verified</div>
-                                <div className="truncate max-w-[200px] text-slate-500">{latestSubmission.evidences[0].sha256Hash?.slice(0, 20)}...</div>
+                              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                                <div style={{ fontWeight: 700, color: '#16a34a', fontFamily: 'monospace' }}>
+                                  ✓ SHA-256 Hashed
+                                </div>
+                                <div style={{ fontFamily: 'monospace', color: '#94a3b8', wordBreak: 'break-all' }}>
+                                  {latestSubmission.evidences[0].sha256Hash?.slice(0, 24)}...
+                                </div>
                               </div>
                             </div>
                           )}
 
                           {latestSubmission.status === 'MORE_EVIDENCE_REQUIRED' && (
-                            <div className="mt-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between">
-                              <span>Field Inspector requested additional ground evidence.</span>
+                            <div
+                              style={{
+                                marginTop: '6px',
+                                padding: '10px 12px',
+                                borderRadius: '8px',
+                                backgroundColor: '#fffbeb',
+                                border: '1px solid #fde68a',
+                                color: '#b45309',
+                                fontSize: '0.8rem',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                gap: '8px',
+                              }}
+                            >
+                              <span>Inspector requested re-verification.</span>
                               <Link
                                 to={`/contractor/projects/${proj.id}/progress/new`}
-                                className="px-3 py-1 bg-amber-500 text-slate-950 font-bold rounded text-xs hover:bg-amber-400 transition"
+                                style={{
+                                  padding: '4px 10px',
+                                  backgroundColor: '#f59e0b',
+                                  color: '#02182b',
+                                  fontWeight: 700,
+                                  borderRadius: '4px',
+                                  fontSize: '0.75rem',
+                                  textDecoration: 'none',
+                                }}
                               >
                                 Upload Version {latestSubmission.version + 1}
                               </Link>
@@ -301,14 +657,37 @@ export const ContractorDashboard: React.FC = () => {
                           )}
                         </div>
                       ) : (
-                        <div className="bg-slate-950/40 border border-dashed border-slate-800 p-8 rounded-xl text-center space-y-3">
-                          <Building className="w-8 h-8 text-slate-600 mx-auto" />
-                          <p className="text-xs text-slate-500">No progress updates uploaded yet for this project.</p>
+                        <div
+                          style={{
+                            backgroundColor: '#ffffff',
+                            border: '2px dashed #cbd5e1',
+                            borderRadius: '12px',
+                            padding: '2rem 1.5rem',
+                            textAlign: 'center',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '8px',
+                          }}
+                        >
+                          <Building size={32} style={{ color: '#94a3b8' }} />
+                          <p style={{ fontSize: '0.825rem', color: '#64748b', margin: 0 }}>
+                            No progress updates uploaded yet for this project.
+                          </p>
                           <Link
                             to={`/contractor/projects/${proj.id}/progress/new`}
-                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-400 hover:underline"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              fontSize: '0.825rem',
+                              fontWeight: 700,
+                              color: '#d97706',
+                              textDecoration: 'none',
+                              marginTop: '4px',
+                            }}
                           >
-                            Submit First Progress Evidence <ChevronRight className="w-3.5 h-3.5" />
+                            Submit First Progress Evidence <ChevronRight size={16} />
                           </Link>
                         </div>
                       )}

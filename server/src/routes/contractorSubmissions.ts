@@ -158,8 +158,11 @@ router.get(
             },
           },
         });
+        if (!projects || projects.length === 0) {
+          throw new Error('No DB projects found, fallback');
+        }
       } catch {
-        // Dev fallback
+        // Dev fallback with all 5 public projects assigned to contractor workspace
         projects = [
           {
             id: 'proj-demo-1',
@@ -176,6 +179,20 @@ router.get(
             contractorSubmissions: inMemoryContractorSubmissions.filter((s) => s.projectId === 'proj-demo-1'),
           },
           {
+            id: 'proj-demo-2',
+            verificationCode: 'MS-WATER-002',
+            title: 'Community Drinking Water Facility (DEMO)',
+            description: 'Overhead tank installation, RO filtration plant setup, and distribution pipeline network.',
+            category: 'WATER',
+            location: 'Pennagaram Village, Dharmapuri District, TN',
+            latitude: 12.1304,
+            longitude: 77.9015,
+            budget: 2800000,
+            status: 'IN_PROGRESS',
+            stages: getOrCreateInMemoryStages('proj-demo-2', 'WATER'),
+            contractorSubmissions: inMemoryContractorSubmissions.filter((s) => s.projectId === 'proj-demo-2'),
+          },
+          {
             id: 'proj-demo-3',
             verificationCode: 'MS-STREET-003',
             title: 'Public Streetlight Installation (DEMO)',
@@ -189,8 +206,61 @@ router.get(
             stages: getOrCreateInMemoryStages('proj-demo-3', 'STREETLIGHT'),
             contractorSubmissions: inMemoryContractorSubmissions.filter((s) => s.projectId === 'proj-demo-3'),
           },
+          {
+            id: 'proj-demo-4',
+            verificationCode: 'MS-SAN-004',
+            title: 'Community Sanitation Facility (DEMO)',
+            description: 'Construction of 8-seater public sanitary complex with continuous water supply and bio-digester tank.',
+            category: 'SANITATION',
+            location: 'Sirumugai Town Panchayat, Coimbatore District, TN',
+            latitude: 11.3210,
+            longitude: 76.9854,
+            budget: 3200000,
+            status: 'IN_PROGRESS',
+            stages: getOrCreateInMemoryStages('proj-demo-4', 'DEFAULT'),
+            contractorSubmissions: inMemoryContractorSubmissions.filter((s) => s.projectId === 'proj-demo-4'),
+          },
+          {
+            id: 'proj-demo-5',
+            verificationCode: 'MS-SCHOOL-005',
+            title: 'Government School Building Renovation (DEMO)',
+            description: 'Roof slab waterproofing, smart classroom wiring, laboratory refurbishing, and exterior plastering.',
+            category: 'PUBLIC_BUILDING',
+            location: 'Orathanadu Block, Thanjavur District, TN',
+            latitude: 10.6251,
+            longitude: 79.2432,
+            budget: 6800000,
+            status: 'IN_PROGRESS',
+            stages: getOrCreateInMemoryStages('proj-demo-5', 'PUBLIC_BUILDING'),
+            contractorSubmissions: inMemoryContractorSubmissions.filter((s) => s.projectId === 'proj-demo-5'),
+          },
         ];
       }
+
+      // Dynamically attach and format stages and submissions for all assigned projects
+      projects = projects.map((p: any) => {
+        const pStages = (p.stages && p.stages.length > 0) ? p.stages : getOrCreateInMemoryStages(p.id, p.category);
+        const memSubs = inMemoryContractorSubmissions.filter((s) => s.projectId === p.id);
+        const dbSubs = p.contractorSubmissions || [];
+        const combinedSubs = [...dbSubs];
+
+        for (const mSub of memSubs) {
+          if (!combinedSubs.some((cs: any) => cs.id === mSub.id)) {
+            combinedSubs.push({
+              ...mSub,
+              evidences: inMemoryProgressEvidences.filter((e) => e.submissionId === mSub.id),
+            });
+          }
+        }
+
+        combinedSubs.sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
+
+        return {
+          ...p,
+          stages: pStages,
+          contractorSubmissions: combinedSubs,
+        };
+      });
 
       return res.status(200).json({ projects });
     } catch (err) {

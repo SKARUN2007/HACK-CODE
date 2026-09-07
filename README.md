@@ -1,40 +1,179 @@
-# MAKKALSAANTRU (மக்கள் சான்று)
+# MakkalSaantru
 
-> **"Public Money. Public Work. Public Proof."**
+> **Public Money. Public Work. Public Proof.**  
 > **Subtitle**: *Citizen-Powered • AI-Assisted • Human-Verified*
 
-MakkalSaantru is a citizen-powered, AI-assisted public-work verification platform. The platform empowers citizens to corroborate public infrastructure milestone progress (**25%, 50%, 75%, 100%**) while projects are actively under execution.
+---
 
-> ⚠️ **IMPORTANT GOVERNING PRINCIPLE**:
-> MakkalSaantru is **NOT a corruption detection system** and **NOT a simple complaint portal**. AI assists solely by analyzing evidence patterns, inconsistencies, and risk indicators. **Final administrative decisions strictly remain with authorized human inspection officials.**
+## Overview
+
+**MakkalSaantru** (மக்கள் சான்று) is a citizen-powered, AI-assisted, human-verified public work verification and civic resource intelligence platform. It transforms raw citizen observations—photos, audio dictation, GPS coordinates, and structured questionnaire responses—into actionable administrative intelligence while public work is actively underway.
+
+By replacing end-of-project post-mortems with active milestone verification (**25%, 50%, 75%, 100%**) and automated civic issue classification, MakkalSaantru enables early government intervention, transparent priority scoring, cross-department case detection, and cryptographically verified resolution proofs.
+
+> ⚠️ **GOVERNING PRINCIPLE**:
+> MakkalSaantru is **NOT a corruption detection tool** and **NOT a simple complaint submission box**. AI algorithms serve exclusively to flag anomalies, compute priority scores, and detect domain overlaps. **All administrative actions, site assignments, and case resolutions strictly require authorized human inspection officials.**
 
 ---
 
-## 🎯 1. Problem Statement
+## Problem Statement
 
-Public infrastructure projects in developing regions often suffer from information asymmetry between officially reported progress and actual ground reality. By the time a project reaches 100% completion status or funds are fully disbursed, identifying missing milestones, unpaved stretches, or substandard quality becomes costly and difficult to rectify.
+Public infrastructure projects in developing regions frequently face severe information asymmetry. Progress reports filed on paper or static portals rarely reflect actual ground reality. By the time a project is declared 100% complete or funds are fully disbursed:
+- Unpaved road stretches, substandard drainage tiles, or missing utility connections are buried under completed documentation.
+- Rectification costs escalate significantly.
+- Citizens lack transparent mechanisms to track milestone progress or verify quality while contractors are on site.
+- Civic complaints remain isolated within single-department silos, ignoring cascading multi-domain failures (e.g., pipe leaks causing road collapses).
 
 ---
 
-## 💡 2. Proposed Solution & Resource Intelligence
+## Solution
 
-MakkalSaantru introduces **Resource Intelligence**:
-Instead of waiting for project completion, citizens submit ground evidence (photos, voice notes, GPS coordinates) at intermediate milestones (**25%, 50%, 75%**).
+MakkalSaantru bridges this gap by introducing **Milestone Verification** and **Civic Resource Intelligence**:
+1. **Intermediate Milestone Verification**: Citizens submit geotagged photo/voice evidence at 25%, 50%, 75%, and 100% milestones, catching defects early.
+2. **AI-Assisted Vision & Heuristics**: Automated visual anomaly flagging without legal accusations or facial recognition.
+3. **Deterministic Authority Routing**: Reports map directly to verified department directories based on issue category and geographic location.
+4. **Action Priority Scoring**: System signals rank inspection queues (0–100 score) so high-impact cases get immediate field attention.
+5. **Cross-Department Case Detection**: Multi-domain issues are detected automatically with dependent action plans.
+6. **Cryptographic Before → After Proof**: SHA-256 evidence hashing and citizen re-verification ensure genuine resolution.
 
-1. **Early Intervention**: If a mismatch is flagged at 50% progress, authorities dispatch an official inspector, confirm the issue, issue a **Corrective Action Order**, and protect public resources *while work is actively underway*.
-2. **Urgency / Priority Engine**: Calculates a 0–100 **ACTION PRIORITY SCORE** from system signals (report count, confirmations, age, category weight) to rank operational review attention.
-3. **Before → After Resolution Proof**: Cryptographically validates corrective action photos (SHA-256 digests), compares visual state, and requires human & citizen re-verification to mark cases resolved.
-4. **Civic Intelligence Heatmap**: Map-based intelligence dashboard (`/authority/civic-map`) visualizing report concentration, 250m radius hotspot detection, area intelligence aggregation, and recurring location signals.
-5. **Cross-Department Case Detection**: Automatically detects multi-domain civic problems (`WATER_SUPPLY` + `ROAD`, `DRAINAGE` + `ROAD`, `SEWAGE` + `ROAD`, `SANITATION` + `DRAINAGE`) from ONE citizen report, maintaining a non-accusatory safety policy and creating sequential action dependency plans.
+---
+
+## Key Features
+
+- 📱 **Mobile-First Citizen PWA**: Fast responsive web app with 6-step guided submission wizard.
+- 🌐 **Tamil & English Bilingual Support**: Native Tamil (`தமிழ்`) and English interface with instant language toggle.
+- 🎙️ **Voice Guidance & Accessibility**: Browser Text-to-Speech (TTS) guidance, simple mode high-contrast UI, and speech dictation.
+- 📴 **Offline-First Capabilities**: Service Worker caching, IndexedDB local queue, and background sync engine.
+- 🔒 **SHA-256 Cryptographic Fingerprinting**: Instant server-side buffer hashing for evidence non-tampering proof.
+- 🛡️ **Cybersecurity Hardening**: Binary magic-byte upload validation, rate limiting, JWT auth, RBAC, and security event logging.
+- 📊 **Authority Intelligence Dashboard**: Real-time priority queue, status counters, and case management tools for inspectors.
+- 🗺️ **Civic Intelligence Heatmap**: 250m radius hotspot detection, area risk aggregation, and interactive canvas visualizer.
+- 🚀 **Inspector Route Planner**: Multi-stop path generation maximizing inspection efficiency based on urgency and location.
+
+---
+
+## Civic Issue Reporting
+
+Citizens can report arbitrary ground issues (`ROAD`, `SANITATION`, `WATER_SUPPLY`, `DRAINAGE`, `STREETLIGHT`, `PUBLIC_BUILDING`, `PUBLIC_SPACE`, `SEWAGE`, `OTHER`) via a 6-step mobile wizard (`/citizen/report`):
+1. **Photo Upload**: Capture or upload ground issue image.
+2. **Geotagged Location**: Auto-detect device location or pin on map.
+3. **AI Classification**: Automated category detection with heuristic fallback.
+4. **Authority Routing**: Deterministic mapping to responsible municipal directory.
+5. **Formal Complaint Generation**: Formats neutral complaint document with tracking code (`MS-CIV-2026-XXXXX`).
+6. **PDF Download & Export**: Generates printable complaint proof with cryptographic fingerprints.
+
+---
+
+## Public Work Verification
+
+Monitors public infrastructure projects (`ROADS`, `BRIDGES`, `WATERWORKS`, `BUILDINGS`, `STREETLIGHTS`) across intermediate milestones:
+- **25% Milestone**: Foundation / Earthwork / Initial excavation.
+- **50% Milestone**: Sub-base / Structural framework / Piping layout.
+- **75% Milestone**: Surface asphalt / Masonry / Utility installation.
+- **100% Milestone**: Final completion & site handover.
+
+Citizens submit multi-angle photos, optional audio dictations, and structured answers to milestone-specific checklists.
+
+---
+
+## Resource Intelligence
+
+MakkalSaantru transforms isolated citizen observations into structured administrative **Resource Intelligence**:
 
 ```
-25% MILESTONE → 50% MILESTONE (Early Warning Flagged) → ACTION PRIORITY QUEUE → CROSS-DEPARTMENT DETECTION → CIVIC HEATMAP → REMEDIAL ACTION → BEFORE/AFTER PROOF → RESOLVED
+Issue Classification
+         ↓
+Authority Mapping
+         ↓
+Community / Evidence Signals
+         ↓
+Priority Intelligence
+         ↓
+Civic Heatmap
+         ↓
+Cross-Domain Detection
+         ↓
+Inspection Planning
+         ↓
+Human Action
+         ↓
+Before/After Verification
 ```
-
 
 ---
 
-## 🏛️ 3. Architecture & System Flow
+## AI-Assisted Verification
+
+- **Principle**: *AI FLAGS — HUMANS DECIDE*.
+- **Constrained Output**: JSON response schema restricted to `CONSISTENT`, `REVIEW`, or `POTENTIAL_MISMATCH`.
+- **Signal Multiifiers**: Combines multi-citizen corroboration counts, distance calculations to target project coordinates, milestone match ratios, and image duplicate suppression.
+- **Vendor Independent**: Pluggable provider architecture supporting live Google Gemini Vision API or deterministic offline fallback.
+
+---
+
+## Priority Engine
+
+Calculates a dynamic **0–100 Action Priority Score** for authority triage using system parameters:
+- `Report Volume`: Number of distinct submissions for the same issue/project.
+- `Citizen Confirmations`: Upvotes and secondary corroborations.
+- `Category Weight`: High-impact domains (e.g., sewage/water contamination weighted higher than streetlights).
+- `Age Decay / Escalation`: Automatic score increase over time for unaddressed reports.
+- `Inspector Manual Override`: Allows authorized inspectors to adjust priority with audited justification.
+
+---
+
+## Civic Heatmap
+
+The **Civic Intelligence Heatmap** (`/authority/civic-map`) aggregates report locations into visual spatial intelligence:
+- **Spatial Hotspot Clustering**: Identifies report concentrations within a 250-meter radius.
+- **Risk Severity Levels**: Color-coded canvas nodes (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`).
+- **Recurring Location Flags**: Highlights chronic problem spots requiring structural intervention.
+
+---
+
+## Inspector Route Planner
+
+The **Inspector Route Planner** (`/authority/route-planner`) assists field officers in organizing daily verification visits:
+- Calculates optimal multi-stop inspection paths based on urgency score and spatial proximity.
+- Interactive route list with navigation coordinates and status tracking.
+- Filterable by department, urgency threshold, and assigned district.
+
+---
+
+## Cross-Department Case Detection
+
+Detects complex multi-domain infrastructure failures from a single citizen report:
+- **Detected Domain Pairs**: `WATER_SUPPLY` + `ROAD` (pipe leak under asphalt), `DRAINAGE` + `ROAD` (overflow damaging pavement), `SEWAGE` + `DRAINAGE` (sewage cross-contamination).
+- **Sequential Action Dependency**: Generates step-by-step coordinated action plans (e.g. *Step 1: Metro Water repairs pipe -> Step 2: Highways Dept resurfaces road*).
+- **Non-Accusatory Policy**: Focuses on resource coordination rather than inter-agency blame.
+
+---
+
+## Before → After Resolution Proof
+
+Ensures verified completion of corrective action orders:
+1. Inspector uploads **After-Repair Photo** upon work completion.
+2. System computes SHA-256 hash of the resolution media.
+3. Performs side-by-side visual status comparison (`Before` vs `After`).
+4. Triggers secondary citizen re-verification workflow before marking case `RESOLVED`.
+
+---
+
+## Cybersecurity
+
+Implemented security controls:
+- **Password Security**: Hashed using `bcrypt` (work factor 10). Omitted from all JSON responses.
+- **JWT Authentication**: Signed via HMAC SHA-256 with `JWT_SECRET` and 24-hour expiration.
+- **Role-Based Access Control (RBAC)**: Middleware permissions enforced (`CITIZEN`, `INSPECTOR`, `ADMIN`).
+- **Binary Magic-Byte Upload Defense**: Inspects file header signatures (`FF D8 FF` JPEG, `89 50 4E 47` PNG, `52 49 46 46` WEBP/WAV) to block executable scripts.
+- **SHA-256 Evidence Integrity**: Server buffer hashing for tamper proofing.
+- **API Rate Limiting**: Global (100 req/15min) and Auth (5 req/15min) rate limiters.
+- **Security Audit Logger**: Active logging of security events (`FAILED_LOGIN`, `ACCESS_DENIED`, `INVALID_UPLOAD`).
+- **Tamper-Evident Chained Audit Log**: Cryptographic hash chaining (`previousHash` -> `recordHash`).
+
+---
+
+## Architecture
 
 ```mermaid
 flowchart TD
@@ -61,143 +200,189 @@ flowchart TD
 
 ---
 
-## 🔒 4. Cybersecurity Architecture
+## Technology Stack
 
-```mermaid
-flowchart LR
-    Client[Client Request] --> Helmet[Helmet Secure Headers]
-    Helmet --> RateLimiter[Rate Limiter - 429 Protection]
-    RateLimiter --> Auth[JWT Verification & Expiry]
-    Auth --> RBAC[Role-Based Access Control]
-    RBAC --> MagicByte[Binary Magic-Byte File Validation]
-    MagicByte --> ZodVal[Zod Input Schema Validation]
-    ZodVal --> SHA256[SHA-256 Evidence Hash Engine]
-    SHA256 --> SecLogger[SecurityEvent Audit Logger]
+- **Frontend**: React 18, Vite, TypeScript, Tailwind CSS, Lucide Icons, Canvas API, Web Speech API.
+- **Backend**: Node.js, Express, TypeScript, Multer, Helmet, Express Rate Limit, Zod.
+- **Database & ORM**: PostgreSQL, Prisma ORM + In-Memory API fallback.
+- **Testing**: Jest, Supertest.
+- **Security**: bcrypt, jsonwebtoken, crypto (SHA-256), magic-byte validator.
+
+---
+
+## Project Structure
+
+```text
+MAKKALSAANTRU/
+├── client/                     # React 18 + Vite Frontend Application
+│   ├── public/                 # PWA Web Manifest, Icons & Static Assets
+│   └── src/
+│       ├── components/         # UI Components, Heatmap Canvas & Priority Cards
+│       ├── context/            # Auth & Language (English/Tamil) Contexts
+│       ├── pages/              # Citizen, Authority & Admin Pages
+│       ├── services/           # API Client, IndexedDB & Sync Engine
+│       └── utils/              # Exif, PDF Generator & Crypto Helpers
+├── server/                     # Node.js + Express + TypeScript Backend
+│   ├── prisma/                 # Prisma Schema & Demo Seeder
+│   └── src/
+│       ├── __tests__/          # Automated Test Suite (12 suites, 89 tests)
+│       ├── middleware/         # Auth, RBAC, Rate Limiter & Magic Byte Validator
+│       ├── routes/             # REST API Endpoints
+│       ├── services/           # AI, Priority Engine, Heatmap & Route Planner
+│       └── utils/              # Crypto, Geo & Security Logger
+├── docs/                       # Architectural & Security Documentation
+├── scripts/                    # Secret Scanner (`scanSecrets.js`)
+├── package.json                # Monorepo Scripts
+├── .env.example                # Environment Variable Template
+└── README.md                   # Project Documentation
 ```
 
 ---
 
-## 📱 5. Citizen Experience & Accessibility
+## Installation
 
-- **Verification Wizard**: Step-by-step indicator (`1. PROJECT` → `2. EVIDENCE` → `3. LOCATION` → `4. QUESTIONS` → `5. REVIEW` → `6. SUBMIT`).
-- **Offline-First PWA**: Service Worker caching, IndexedDB offline report storage, and automatic/manual `SYNC NOW` sync engine.
-- **Accessibility & Language**:
-  - Tamil (`தமிழ்`) and English bilingual support.
-  - Text-to-Speech (TTS) spoken guidance.
-  - Voice-friendly Simple Mode toggle with high contrast and large buttons.
-  - Browser audio dictation for hands-free notes.
+```bash
+# 1. Clone repository
+git clone <MY_GITHUB_REPOSITORY_URL>
+cd ANVESHAN'26
 
----
-
-## 🤖 6. AI-Assisted Verification Engine
-
-- **Principle**: *AI FLAGS — HUMANS DECIDE*.
-- **Outputs**: Strictly constrained to JSON schema (`CONSISTENT`, `REVIEW`, `POTENTIAL_MISMATCH`).
-- **Inputs**: Multi-citizen corroboration, distance to project coordinates, milestone match ratio, duplicate image discounting, and AI Vision (Gemini / vendor-independent mock).
+# 2. Install dependencies across client and server
+npm run install:all
+```
 
 ---
 
-## 🛡️ 7. Cybersecurity Hardening
+## Environment Configuration
 
-1. **Password Security**: Passwords hashed with `bcrypt` (work factor 10). Password strength requirement (min 8 chars, 1 letter, 1 number). `passwordHash` omitted from API responses.
-2. **JWT Security**: Signed via HMAC SHA-256 with `JWT_SECRET` and 24h expiration.
-3. **RBAC & Anti-IDOR**: Server middleware enforces role permissions (`CITIZEN`, `INSPECTOR`, `ADMIN`) and evidence ownership (`userId === req.user.id`).
-4. **Binary Magic-Byte Upload Defense**: `fileValidator.ts` checks binary signatures (`FF D8 FF` for JPEG, `89 50 4E 47` for PNG, `52 49 46 46` for WEBP/WAV) to reject disguised executables (`.sh`, `.php`).
-5. **Security Event Monitoring**: Active `/admin/security` dashboard tracking real events (`FAILED_LOGIN`, `LOGIN_RATE_LIMITED`, `ACCESS_DENIED`, `INVALID_TOKEN`, `INVALID_UPLOAD`, `INTEGRITY_MISMATCH`).
-6. **Secrets Management**: Repository verified clean using `node scripts/scanSecrets.js`.
+Copy `.env.example` to `server/.env`:
+
+```bash
+cp .env.example server/.env
+```
+
+Verify variables in `server/.env`:
+```env
+PORT=5005
+NODE_ENV=development
+DATABASE_URL="postgresql://user:password@localhost:5432/makkalsaantru?schema=public"
+JWT_SECRET="your_jwt_secret_key_here"
+CLIENT_ORIGIN="http://localhost:5173"
+AI_PROVIDER="mock"
+```
 
 ---
 
-## 💻 8. Technology Stack
+## Database Setup
 
-- **Frontend**: React 18, Vite, TypeScript, PWA Manifest & Service Worker, IndexedDB Storage, Web Speech API, MediaRecorder API, Lucide React Icons.
-- **Backend**: Node.js, Express, TypeScript, Multer, Helmet, CORS, Express Rate Limit, Zod.
-- **Database & ORM**: PostgreSQL & Prisma ORM + API in-memory fallback.
-- **Testing**: Jest, Supertest.
+```bash
+# Generate Prisma Client & Run Migrations (if PostgreSQL is active)
+cd server
+npx prisma generate
+npx prisma db push
+
+# Seed demo dataset
+npm run seed:demo
+```
 
 ---
 
-## 🔑 9. Demo Accounts & Credentials
+## Running the Application
 
-| Role | Email | Password | Access Workspace |
-|---|---|---|---|
+```bash
+# Run both Backend (Port 5005) and Frontend (Port 5173) in dev mode
+# Terminal 1: Backend
+npm run dev:server
+
+# Terminal 2: Frontend
+npm run dev:client
+```
+
+---
+
+## Demo Data
+
+The repository includes pre-populated fictional demo datasets for evaluation:
+
+| Role | Username / Email | Password | Target Page |
+| :--- | :--- | :--- | :--- |
 | **CITIZEN** | `citizen@makkalsaantru.gov.in` | `citizen123` | `/citizen` |
 | **INSPECTOR** | `inspector@makkalsaantru.gov.in` | `inspector123` | `/authority` |
 | **ADMINISTRATOR** | `admin@makkalsaantru.gov.in` | `admin123` | `/admin/security` |
 
 ---
 
-## 🚀 10. Installation & Setup
+## API Documentation
 
-### Prerequisites
-- Node.js (v18+) & npm
+Detailed endpoint specifications are documented in [`docs/API.md`](docs/API.md).
 
-### Installation Commands
+Key REST Routes:
+- `POST /api/auth/login`: Authenticate user & issue JWT.
+- `GET /api/projects`: List public infrastructure projects.
+- `POST /api/projects/:id/evidence`: Submit geotagged progress verification evidence.
+- `POST /api/civic-reports`: Submit citizen civic issue report.
+- `GET /api/authority/dashboard`: Retrieve authority triage dashboard.
+- `POST /api/authority/cases/:id/decision`: Record human inspection decision.
+- `GET /api/admin/security/events`: Retrieve live security audit events.
+
+---
+
+## Testing
+
+Run the automated test suite across all 12 test suites:
+
 ```bash
-# 1. Install dependencies across monorepo
-npm run install:all
-
-# 2. Seed demo dataset (Safe fictional data)
-npm run seed:demo
-
-# 3. Run secret scanning script
-npm run scan:secrets
-
-# 4. Run automated test suite (43 tests passing)
 npm test
-
-# 5. Start development servers (Backend: 5005, Frontend: 5173)
-npm run dev:server
-npm run dev:client
 ```
 
----
+Test Results:
+- **Test Suites**: 12 passed, 12 total
+- **Tests**: 89 passed, 89 total
 
 ---
 
-## 🏛️ 10. Civic Issue Reporting Module
+## Security
 
-MakkalSaantru now features a complete **Report a Civic Issue** module designed so ordinary citizens can report civic problems without knowing responsible government departments:
+Run the secret scanning script before committing code:
 
-- **6-Step Mobile-First Wizard** (`/citizen/report`): Photo Capture → Geotagged Location → AI Issue Identification → Citizen Confirmation → Formal Complaint Generation → Review & Export.
-- **9 Supported Civic Domains**: `ROAD`, `SANITATION`, `WATER_SUPPLY`, `DRAINAGE`, `STREETLIGHT`, `PUBLIC_BUILDING`, `PUBLIC_SPACE`, `SEWAGE`, `OTHER`.
-- **Server-Side AI Vision & Heuristic Fallback**: AI vision identifies observable civic issues without making legal accusations or performing facial recognition. Works seamlessly when AI API is unavailable.
-- **Configured Authority Routing**: Deterministic matching mapping Category + Location to `AuthorityDirectory` entries. LLM does NOT invent departments.
-- **Formal Complaint & PDF Download**: Generates structured complaints with internal `MS-CIV-2026-XXXXX` report codes, SHA-256 evidence fingerprints, and printable PDF exports with `HACKATHON PROTOTYPE` watermarks.
+```bash
+npm run scan:secrets
+```
 
----
-
-## 📄 11. API Summary Table
-
-| Method | Endpoint | Auth Req | Allowed Role | Purpose |
-|---|---|---|---|---|
-| `GET` | `/api/health` | No | Public | System status |
-| `GET` | `/api/system/info` | No | Public | Operational metadata |
-| `POST` | `/api/auth/login` | No | Public | Authenticate user & issue JWT |
-| `GET` | `/api/projects` | No | Public | List public projects |
-| `POST` | `/api/projects/:id/evidence` | Yes | CITIZEN | Submit geotagged evidence |
-| `POST` | `/api/verifications/project/:id/analyze` | Yes | INSPECTOR/ADMIN | Run AI verification analysis |
-| `GET` | `/api/authority/dashboard` | Yes | INSPECTOR/ADMIN | Authority intelligence dashboard |
-| `POST` | `/api/authority/cases/:id/decision` | Yes | INSPECTOR/ADMIN | Record human inspection decision |
-| `POST` | `/api/civic-reports/classify` | No | Public | AI-assisted vision & heuristic classification |
-| `POST` | `/api/civic-reports/route-authority` | No | Public | Deterministic category + location authority routing |
-| `POST` | `/api/civic-reports/generate-complaint` | No | Public | Generate formal structured neutral complaint text |
-| `POST` | `/api/civic-reports` | Yes | CITIZEN | Submit geotagged civic issue report |
-| `GET` | `/api/civic-reports/my-reports` | Yes | CITIZEN | List citizen's civic report history |
-| `GET` | `/api/civic-reports/all` | Yes | INSPECTOR/ADMIN | View all civic reports across departments |
-| `GET` | `/api/authority-directory` | No | Public | Fetch configured authority directory entries |
-| `POST` | `/api/admin/authorities` | Yes | ADMIN | Create new authority directory entry |
-| `GET` | `/api/admin/security/events` | Yes | ADMIN | Live security event feed |
+See [`docs/SECURITY.md`](docs/SECURITY.md) and [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md) for full threat modeling and security specifications.
 
 ---
 
-## ⚠️ 12. Known Limitations & Future Scope
+## Known Limitations
 
-### Known Prototype Limitations
-- Demonstrates with fictional demo project data. Not connected to live government systems.
-- SHA-256 hash proves integrity after receipt on server; GPS signals can be spoofed on client devices.
+- **Hackathon Prototype**: Built for demonstration purposes with fictional demo datasets.
+- **GPS Signal Spoofing**: Client GPS coordinates are trust signals and can potentially be spoofed by client software.
+- **SHA-256 Integrity Scope**: Proves evidence was not altered after server receipt; does not independently prove real-world visual truthfulness.
+- **AI Decision Support**: AI outputs are advisory. All final administrative actions require human inspector review.
+- **Heatmap Representation**: Heatmap clusters represent report submission density, not confirmed physical danger.
+- **Inspector Routes**: Generated routes serve as decision support tools for field officers.
 
-### Future Scope
-- Authorized government API integration.
-- Additional Indian regional languages (Hindi, Telugu, Kannada, Malayalam).
-- IVR and basic feature-phone reporting bridge.
+---
+
+## Future Scope
+
+- Direct API integration with municipal GIS and government e-Governance portals.
+- Additional language support (Hindi, Telugu, Kannada, Malayalam).
+- Automated perceptual image similarity (AI vision embeddings) for near-duplicate image detection.
+- IVR and SMS gateway integration for feature phones.
+
+---
+
+## Team
+
+**Team Hack & Code**
+- **S K Arun Amuthan** — Team Lead
+- **D Balaji** — Team Member
+- **P Ashwin** — Team Member
+
+*SRM TRP Engineering College*
+
+---
+
+## Disclaimer
+
+**MakkalSaantru is a hackathon prototype and is not an official Government of India or Tamil Nadu Government service.**

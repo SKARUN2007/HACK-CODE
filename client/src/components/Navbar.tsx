@@ -100,27 +100,47 @@ export const Navbar: React.FC<NavbarProps> = ({ userRole, onLogout }) => {
             <Link to="/citizen" className={`nav-item ${location.pathname === '/citizen' ? 'active' : ''}`}>
               {language === 'TA' ? 'பொதுமக்கள் தளம்' : 'Citizen Workspace'}
             </Link>
-            <Link to="/contractor" className={`nav-item ${location.pathname.startsWith('/contractor') ? 'active' : ''}`} style={{ color: '#f97316', fontWeight: 800 }}>
-              {language === 'TA' ? 'ஒப்பந்ததாரர் தளம்' : 'Contractor'}
-            </Link>
-            <Link to="/citizen/report" className={`nav-item ${location.pathname === '/citizen/report' ? 'active' : ''}`} style={{ color: '#fbbf24', fontWeight: 800 }}>
-              {language === 'TA' ? 'புகாரளிக்கவும்' : 'Report Civic Issue'}
-            </Link>
-            <Link to="/citizen/reports" className={`nav-item ${location.pathname === '/citizen/reports' ? 'active' : ''}`}>
-              {language === 'TA' ? 'என் புகார்கள்' : 'My Reports'}
-            </Link>
-            <Link to="/authority" className={`nav-item ${location.pathname === '/authority' ? 'active' : ''}`}>
-              {language === 'TA' ? 'அதிகாரிகள் தளம்' : 'Authority'}
-            </Link>
-            <Link to="/authority/civic-map" className={`nav-item ${location.pathname === '/authority/civic-map' ? 'active' : ''}`} style={{ color: '#38bdf8', fontWeight: 800 }}>
-              {language === 'TA' ? 'அமைவிட வரைபடம்' : 'Civic Map'}
-            </Link>
-            <Link to="/authority/inspection-routes" className={`nav-item ${location.pathname.startsWith('/authority/inspection-routes') || location.pathname === '/authority/my-routes' ? 'active' : ''}`} style={{ color: '#a7f3d0', fontWeight: 800 }}>
-              {language === 'TA' ? 'ஆய்வுப் பாதைகள்' : 'Inspection Routes'}
-            </Link>
-            <Link to="/admin" className={`nav-item ${location.pathname.startsWith('/admin') && !location.pathname.includes('security') ? 'active' : ''}`}>
-              {language === 'TA' ? 'நிர்வாகம்' : 'Admin'}
-            </Link>
+
+            {/* CITIZEN LINKS */}
+            {userRole === 'CITIZEN' && (
+              <>
+                <Link to="/citizen/report" className={`nav-item ${location.pathname === '/citizen/report' ? 'active' : ''}`} style={{ color: '#fbbf24', fontWeight: 800 }}>
+                  {language === 'TA' ? 'புகாரளிக்கவும்' : 'Report Civic Issue'}
+                </Link>
+                <Link to="/citizen/reports" className={`nav-item ${location.pathname === '/citizen/reports' ? 'active' : ''}`}>
+                  {language === 'TA' ? 'என் புகார்கள்' : 'My Reports'}
+                </Link>
+              </>
+            )}
+
+            {/* CONTRACTOR LINKS */}
+            {userRole === 'CONTRACTOR' && (
+              <Link to="/contractor" className={`nav-item ${location.pathname.startsWith('/contractor') ? 'active' : ''}`} style={{ color: '#f97316', fontWeight: 800 }}>
+                {language === 'TA' ? 'ஒப்பந்ததாரர் தளம்' : 'Contractor Workspace'}
+              </Link>
+            )}
+
+            {/* INSPECTOR & ADMIN LINKS */}
+            {(userRole === 'INSPECTOR' || userRole === 'ADMIN') && (
+              <>
+                <Link to="/authority" className={`nav-item ${location.pathname === '/authority' ? 'active' : ''}`}>
+                  {language === 'TA' ? 'அதிகாரிகள் தளம்' : 'Authority Dashboard'}
+                </Link>
+                <Link to="/authority/civic-map" className={`nav-item ${location.pathname === '/authority/civic-map' ? 'active' : ''}`} style={{ color: '#38bdf8', fontWeight: 800 }}>
+                  {language === 'TA' ? 'அமைவிட வரைபடம்' : 'Civic Map'}
+                </Link>
+                <Link to="/authority/inspection-routes" className={`nav-item ${location.pathname.startsWith('/authority/inspection-routes') || location.pathname === '/authority/my-routes' ? 'active' : ''}`} style={{ color: '#a7f3d0', fontWeight: 800 }}>
+                  {language === 'TA' ? 'ஆய்வுப் பாதைகள்' : 'Inspection Routes'}
+                </Link>
+              </>
+            )}
+
+            {/* ADMIN ONLY LINKS */}
+            {userRole === 'ADMIN' && (
+              <Link to="/admin" className={`nav-item ${location.pathname.startsWith('/admin') && !location.pathname.includes('security') ? 'active' : ''}`}>
+                {language === 'TA' ? 'நிர்வாகம்' : 'Admin'}
+              </Link>
+            )}
 
             {userRole ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginLeft: '0.5rem' }}>

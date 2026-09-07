@@ -18,6 +18,7 @@ import {
   Navigation,
   Globe,
   Camera,
+  HardHat,
 } from 'lucide-react';
 import { Project } from '../types';
 import { cacheProjectsLocally, getCachedProjectsLocally, getAllPendingEvidence } from '../services/db';
@@ -442,9 +443,48 @@ export const CitizenDashboard: React.FC = () => {
                       <MapPin size={16} style={{ color: '#94a3b8', flexShrink: 0 }} /> {proj.location}
                     </p>
 
-                    <p style={{ fontSize: '0.85rem', color: '#334155', marginBottom: '1.25rem', lineClamp: 2, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    <p style={{ fontSize: '0.85rem', color: '#334155', marginBottom: '1rem', lineClamp: 2, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                       {proj.description}
                     </p>
+
+                    {/* Contractor Submission Review Badge */}
+                    {proj.contractorSubmissions && proj.contractorSubmissions.length > 0 && (
+                      <div
+                        style={{
+                          backgroundColor: '#fffbeb',
+                          border: '1px solid #fde68a',
+                          borderRadius: '10px',
+                          padding: '10px 12px',
+                          marginBottom: '1rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: '8px',
+                          fontSize: '0.825rem',
+                          color: '#92400e',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', overflow: 'hidden' }}>
+                          <HardHat size={16} style={{ color: '#d97706', flexShrink: 0 }} />
+                          <span style={{ fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {isTA ? 'ஒப்பந்ததாரர் சான்று:' : 'Contractor Evidence:'} "{proj.contractorSubmissions[0].title}"
+                          </span>
+                        </div>
+                        <span
+                          style={{
+                            backgroundColor: '#d97706',
+                            color: '#ffffff',
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            fontSize: '0.7rem',
+                            fontWeight: 800,
+                            flexShrink: 0,
+                          }}
+                        >
+                          {isTA ? 'சரிபார்க்க தயார்' : 'READY TO REVIEW'}
+                        </span>
+                      </div>
+                    )}
 
                     {/* Progress Bar */}
                     <div style={{ marginBottom: '1.5rem', backgroundColor: '#f8fafc', padding: '0.85rem', borderRadius: '8px', border: '1px solid #f1f5f9' }}>

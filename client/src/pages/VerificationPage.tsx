@@ -18,6 +18,7 @@ import {
   AlertCircle,
   Zap,
   Clock,
+  HardHat,
 } from 'lucide-react';
 import { Project } from '../types';
 import { getTranslation, SupportedLanguage } from '../services/i18n';
@@ -566,9 +567,30 @@ export const VerificationPage: React.FC = () => {
             ))}
           </div>
 
-          {error && (
-            <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', padding: '1rem', borderRadius: '8px', fontSize: '0.9rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <AlertCircle size={20} /> {error}
+          {/* CONTRACTOR PROGRESS CLAIM CORROBORATION BANNER */}
+          {project?.contractorSubmissions && project.contractorSubmissions.length > 0 && (
+            <div
+              style={{
+                backgroundColor: '#fffbeb',
+                border: '2px solid #fde68a',
+                borderRadius: '12px',
+                padding: '1.25rem',
+                marginBottom: '1.75rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: '#92400e', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase' }}>
+                <HardHat size={18} style={{ color: '#d97706' }} />
+                {isTA ? 'ஒப்பந்ததாரர் பணி முன்னேற்ற சான்று சரிபார்ப்பு' : 'CORROBORATING CONTRACTOR PROGRESS EVIDENCE'}
+              </div>
+              <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', marginBottom: '4px' }}>
+                {project.contractorSubmissions[0].title}
+              </div>
+              <div style={{ backgroundColor: '#ffffff', border: '1px solid #fef08a', padding: '8px 12px', borderRadius: '6px', fontSize: '0.9rem', fontStyle: 'italic', color: '#334155', marginBottom: '10px' }}>
+                "{project.contractorSubmissions[0].claim}"
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#78350f', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                💡 {isTA ? 'கீழே உள்ள புகைப்படமும் கருத்துக்களும் ஒப்பந்ததாரரின் மேற்கண்ட சான்றை சரிபார்க்க பயன்படும்.' : 'Your uploaded photo and ground observation below will directly corroborate or dispute this contractor claim.'}
+              </div>
             </div>
           )}
 

@@ -9,6 +9,7 @@ import { createChainedAuditLog } from '../utils/auditLogger';
 import { ExactHashSimilarityService } from '../services/similarity/similarity.interface';
 import { validateFileMagicBytes } from '../middleware/fileValidator';
 import { logSecurityEvent } from '../utils/securityLogger';
+import { inMemoryContractorSubmissions, inMemoryProgressEvidences } from './contractorSubmissions';
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -131,7 +132,14 @@ router.get('/', async (req, res) => {
       }
       projects = await prisma.project.findMany({
         where,
-        include: { milestones: { orderBy: { percentage: 'asc' } } },
+        include: {
+          milestones: { orderBy: { percentage: 'asc' } },
+          stages: { orderBy: { sequence: 'asc' } },
+          contractorSubmissions: {
+            include: { evidences: true, verifications: true, analyses: true, decisions: true },
+            orderBy: { submittedAt: 'desc' },
+          },
+        },
         orderBy: { createdAt: 'desc' },
       });
 
@@ -143,6 +151,29 @@ router.get('/', async (req, res) => {
         (p) => !category || category === 'ALL' || p.category === String(category).toUpperCase()
       );
     }
+
+    // Merge in-memory contractor submissions into each project object for dev/demo mode
+    projects = projects.map((p: any) => {
+      const memSubs = inMemoryContractorSubmissions.filter((s) => s.projectId === p.id);
+      const existingSubs = p.contractorSubmissions || [];
+      const combined = [...existingSubs];
+
+      for (const mSub of memSubs) {
+        if (!combined.some((cs: any) => cs.id === mSub.id)) {
+          combined.push({
+            ...mSub,
+            evidences: inMemoryProgressEvidences.filter((e) => e.submissionId === mSub.id),
+          });
+        }
+      }
+
+      combined.sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
+
+      return {
+        ...p,
+        contractorSubmissions: combined,
+      };
+    });
 
     return res.status(200).json({ projects });
   } catch (err) {
@@ -222,6 +253,23 @@ router.get('/:id', async (req, res) => {
     if (!project) {
       return res.status(404).json({ error: 'Project not found.' });
     }
+
+    // Merge in-memory contractor submissions for dev/demo mode
+    const memSubs = inMemoryContractorSubmissions.filter((s) => s.projectId === id);
+    const existingSubs = (project as any).contractorSubmissions || [];
+    const combined = [...existingSubs];
+
+    for (const mSub of memSubs) {
+      if (!combined.some((cs: any) => cs.id === mSub.id)) {
+        combined.push({
+          ...mSub,
+          evidences: inMemoryProgressEvidences.filter((e) => e.submissionId === mSub.id),
+        });
+      }
+    }
+
+    combined.sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
+    project = { ...project, contractorSubmissions: combined };
 
     return res.status(200).json({ project });
   } catch (err) {

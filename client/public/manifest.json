@@ -1,16 +1,48 @@
 {
   "short_name": "MakkalSaantru",
-  "name": "MakkalSaantru - Public-Work Verification Platform",
+  "name": "MakkalSaantru - Public-Work Verification & Civic Intelligence Platform",
+  "description": "Public Money. Public Work. Public Proof. Citizen-powered, AI-assisted, human-verified public work verification and civic resource intelligence.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#02182b",
+  "theme_color": "#002B49",
+  "categories": ["government", "productivity", "utilities"],
   "icons": [
     {
-      "src": "favicon.ico",
+      "src": "/favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
+    },
+    {
+      "src": "/logo.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": "/",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
-  "display": "standalone",
-  "orientation": "portrait"
+  "shortcuts": [
+    {
+      "name": "Report Civic Issue",
+      "short_name": "Report",
+      "description": "Report a local ground issue with photo and GPS",
+      "url": "/citizen/report",
+      "icons": [{ "src": "/logo.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Citizen Workspace",
+      "short_name": "Citizen",
+      "description": "View active public works and verify progress",
+      "url": "/citizen",
+      "icons": [{ "src": "/logo.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Contractor Workspace",
+      "short_name": "Contractor",
+      "description": "Upload physical milestone evidence from work site",
+      "url": "/contractor",
+      "icons": [{ "src": "/logo.svg", "sizes": "192x192" }]
+    }
+  ]
 }

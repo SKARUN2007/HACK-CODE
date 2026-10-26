@@ -20,12 +20,16 @@ import {
   Building2,
   Globe,
   WifiOff,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { savePendingCivicReport } from '../services/db';
 import { downloadComplaintText, printOrDownloadComplaintPDF } from '../utils/pdfGenerator';
 import { Logo } from '../components/Logo';
 import { detectCrossDomains } from '../services/crossDomainService';
+import { compressImageToWebP } from '../utils/imageCompressor';
+import { speakAudioPrompt, stopAudioPrompt, initSpeechRecognition } from '../utils/speechUtils';
 
 
 export type CivicCategoryType =
@@ -121,8 +125,40 @@ export const ReportCivicIssuePage: React.FC = () => {
   // Location & Form Notice State
   const [formNotice, setFormNotice] = useState<string | null>(null);
 
-  // Handle Photo Selection
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Live Speech-to-Text Dictation State
+  const [isDictating, setIsDictating] = useState<boolean>(false);
+  const speechRecognizerRef = useRef<any>(null);
+
+  const toggleDictation = () => {
+    if (isDictating) {
+      speechRecognizerRef.current?.stop();
+      setIsDictating(false);
+    } else {
+      const recognizer = initSpeechRecognition({
+        lang: isTA ? 'TA' : 'EN',
+        onTranscript: (spoken) => {
+          setDescription((prev) => (prev ? `${prev} ${spoken}` : spoken));
+        },
+        onStateChange: (listening) => setIsDictating(listening),
+        onError: () => {
+          setFormNotice(isTA ? 'குரல் அறிதல் பிழை ஏற்பட்டது.' : 'Voice recognition encountered an error.');
+        },
+      });
+      if (recognizer) {
+        speechRecognizerRef.current = recognizer;
+        recognizer.start();
+      } else {
+        setFormNotice(isTA ? 'உங்கள் உலாவியில் குரல் உள்ளீடு ஆதரிக்கப்படவில்லை.' : 'Speech recognition not supported in this browser.');
+      }
+    }
+  };
+
+  const handleSpeakStep = (text: string) => {
+    speakAudioPrompt(text, isTA ? 'TA' : 'EN');
+  };
+
+  // Handle Photo Selection with automatic client-side WebP compression
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -140,8 +176,15 @@ export const ReportCivicIssuePage: React.FC = () => {
     }
 
     setFormNotice(null);
-    setPhotoFile(file);
     setPhotoPreview(URL.createObjectURL(file));
+
+    // Compress to WebP for minimal bandwidth and rapid mobile upload
+    try {
+      const compressed = await compressImageToWebP(file, 0.75);
+      setPhotoFile(compressed);
+    } catch {
+      setPhotoFile(file);
+    }
   };
 
   // Voice recording handlers
@@ -559,11 +602,49 @@ export const ReportCivicIssuePage: React.FC = () => {
               </p>
             </div>
           </div>
-          {isOffline && (
-            <span style={{ fontSize: '0.72rem', backgroundColor: '#dc2626', color: '#ffffff', padding: '0.3rem 0.6rem', borderRadius: '999px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-              <WifiOff size={12} /> {isTA ? 'இணையமின்றி' : 'OFFLINE'}
-            </span>
-          )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <button
+              type="button"
+              onClick={() => {
+                const textToSpeak = isTA
+                  ? (step === 1 ? 'படி ஒன்று: பிரச்சினை உள்ள இடத்தின் புகைப்படத்தை எடுக்கவும் அல்லது பதிவேற்றவும். சிறுகுறிப்பை குரல் மூலமும் கூறலாம்.'
+                    : step === 2 ? 'படி இரண்டு: உங்கள் நேரடி ஜி.பி.எஸ் இருப்பிடத்தைப் பெறவும் அல்லது வரைபடத்தில் குறிக்கவும்.'
+                    : step === 3 ? 'படி மூன்று: செயற்கை நுண்ணறிவு உதவியுடன் துறை மற்றும் வகை சரிபார்க்கப்படுகிறது.'
+                    : step === 4 ? 'படி நான்கு: கள நிலை பற்றிய விவரங்களை உறுதிப்படுத்தவும்.'
+                    : step === 5 ? 'படி ஐந்து: அதிகாரப்பூர்வ புகார் ஆவணம் உருவாக்கப்படுகிறது.'
+                    : 'படி ஆறு: புகார் சான்று மற்றும் குறியீட்டைப் பெற்றுக்கொள்ளுங்கள்.')
+                  : (step === 1 ? 'Step one: Capture or upload evidence photo of the issue, and provide optional notes or voice.'
+                    : step === 2 ? 'Step two: Capture your live GPS location or pin the location on the map.'
+                    : step === 3 ? 'Step three: AI assisted categorization and municipal department detection.'
+                    : step === 4 ? 'Step four: Confirm ground observation details.'
+                    : step === 5 ? 'Step five: Official complaint draft and routing.'
+                    : 'Step six: Save your complaint tracking code and cryptographic receipt.');
+                handleSpeakStep(textToSpeak);
+              }}
+              title={isTA ? 'குரல் வழி வழிகாட்டலைக் கேட்க' : 'Listen to Voice Guidance'}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                backgroundColor: 'rgba(255,255,255,0.12)',
+                border: '1px solid rgba(251, 191, 36, 0.4)',
+                color: '#fbbf24',
+                padding: '0.3rem 0.65rem',
+                borderRadius: '8px',
+                fontSize: '0.75rem',
+                fontWeight: 800,
+                cursor: 'pointer',
+              }}
+            >
+              <Volume2 size={15} />
+              {isTA ? 'குரல் வழிகாட்டல்' : 'Audio Guide'}
+            </button>
+            {isOffline && (
+              <span style={{ fontSize: '0.72rem', backgroundColor: '#dc2626', color: '#ffffff', padding: '0.3rem 0.6rem', borderRadius: '999px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <WifiOff size={12} /> {isTA ? 'இணையமின்றி' : 'OFFLINE'}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Wizard Progress Bar */}
@@ -685,15 +766,39 @@ export const ReportCivicIssuePage: React.FC = () => {
             )}
           </div>
 
-          {/* Short Description input */}
+          {/* Short Description input with Speech Dictation */}
           <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{ display: 'block', fontWeight: 700, fontSize: '0.88rem', color: '#1e293b', marginBottom: '0.4rem' }}>
-              {isTA ? 'சிறுகுறிப்பு (விருப்பம்)' : 'ADD SHORT DESCRIPTION (OPTIONAL)'}
-            </label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+              <label style={{ fontWeight: 700, fontSize: '0.88rem', color: '#1e293b' }}>
+                {isTA ? 'சிறுகுறிப்பு (விருப்பம்)' : 'ADD SHORT DESCRIPTION (OPTIONAL)'}
+              </label>
+              <button
+                type="button"
+                onClick={toggleDictation}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  backgroundColor: isDictating ? '#dc2626' : 'rgba(251, 191, 36, 0.15)',
+                  color: isDictating ? '#ffffff' : '#d97706',
+                  border: isDictating ? '1px solid #dc2626' : '1px solid #fde68a',
+                  padding: '0.25rem 0.65rem',
+                  borderRadius: '6px',
+                  fontSize: '0.78rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                }}
+              >
+                <Mic size={14} />
+                {isDictating
+                  ? (isTA ? 'பேசுங்கள்... நிறுத்து' : 'Listening... Stop')
+                  : (isTA ? 'குரல் மூலம் எழுதுக' : 'Voice Dictate')}
+              </button>
+            </div>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder={isTA ? 'எடுத்துக்காட்டு: சாலையில் பெரிய குழி உள்ளது...' : 'e.g., Deep pothole near main bus stop area causing traffic blockage...'}
+              placeholder={isTA ? 'எடுத்துக்காட்டு: சாலையில் பெரிய குழி உள்ளது... (குரல் மூலமும் தட்டச்சு செய்யலாம்)' : 'e.g., Deep pothole near main bus stop area causing traffic blockage... (you can also dictate)'}
               style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '0.9rem', minHeight: '80px' }}
             />
           </div>
